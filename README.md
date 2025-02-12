@@ -70,6 +70,7 @@ python3 manage.py runserver
 ### Accès au projet
 - Interface d'administration : http://127.0.0.1:8000/admin/
 - API : http://127.0.0.1:8000/api/
+
   
 ---
 
@@ -92,3 +93,8 @@ python3 manage.py runserver
 - POST /api/dossiers/{id}/change_status/ : Changer le statut d'un dossier
 
 ---
+
+### Notes
+- Assurez-vous que votre base de données MySQL est en cours d'exécution.
+- Vérifiez que le fichier .env est bien configuré.
+- En cas de problème avec les dépendances, utilisez pip freeze > requirements.txt pour mettre à jour la liste des packages nécessaires.

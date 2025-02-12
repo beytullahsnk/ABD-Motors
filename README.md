@@ -70,6 +70,7 @@ python3 manage.py runserver
 ### Accès au projet
 - Interface d'administration : http://127.0.0.1:8000/admin/
 - API : http://127.0.0.1:8000/api/
+
   
 ---
 

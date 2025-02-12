@@ -1,6 +1,7 @@
 from django.db import models
+from user.models import User
 
-# Create your models here.
+# Models vehicle.
 
 class Vehicle(models.Model):
     TYPES = (
@@ -24,6 +25,30 @@ class Vehicle(models.Model):
     state = models.CharField(max_length=20, choices=STATES)
     description = models.TextField()
     date_added = models.DateTimeField(auto_now_add=True)
+    
+    # Nouvelles options de location
+    has_insurance = models.BooleanField(default=False)
+    has_assistance = models.BooleanField(default=False)
+    has_maintenance = models.BooleanField(default=False)
+    has_technical_control = models.BooleanField(default=False)
+    
+    # Relations avec les utilisateurs
+    owner = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='owned_vehicles'
+    )
+    renter = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='rented_vehicles'
+    )
+    rental_start_date = models.DateTimeField(null=True, blank=True)
+    rental_end_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'vehicles'

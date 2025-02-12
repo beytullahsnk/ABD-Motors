@@ -3,12 +3,13 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from user.permissions import IsGestionnaireOrAdmin, IsOwnerOrStaff
-from .models import Folder
-from .serializers import FolderSerializer
+from .models import Folder, File
+from .serializers import FolderSerializer, FileSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
 
-# Create your views here.
 
 class FolderViewSet(viewsets.ModelViewSet):
     serializer_class = FolderSerializer
@@ -41,3 +42,22 @@ class FolderViewSet(viewsets.ModelViewSet):
             {'error': 'Statut invalide'},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+class FileViewSet(viewsets.ModelViewSet):
+    serializer_class = FileSerializer
+    parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated, IsOwnerOrStaff]
+
+    def get_queryset(self):
+        return File.objects.filter(folder_id=self.kwargs['folder_pk'])
+
+    def perform_create(self, serializer):
+        folder = Folder.objects.get(id=self.kwargs['folder_pk'])
+        if not IsOwnerOrStaff().has_object_permission(self.request, self, folder):
+            raise PermissionDenied()
+        serializer.save(folder=folder)
+
+    def perform_update(self, serializer):
+        if not IsOwnerOrStaff().has_object_permission(self.request, self, serializer.instance.folder):
+            raise PermissionDenied()
+        serializer.save()

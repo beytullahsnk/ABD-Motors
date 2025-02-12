@@ -57,9 +57,9 @@ python3 manage.py runserver
 - `GET /api/auth/utilisateurs/me/` : Profil de l'utilisateur connecté
 
 ### Véhicules
-- `GET /api/vehicules/` : Liste des véhicules
-- `POST /api/vehicules/` : Ajouter un véhicule
-- `GET /api/vehicules/{id}/` : Détails d'un véhicule
+- `GET /api/vehicles/` : Liste des véhicules
+- `POST /api/vehicles/` : Ajouter un véhicule
+- `GET /api/vehicles/{id}/` : Détails d'un véhicule
 
 ### Dossiers
 - `GET /api/dossiers/` : Liste des dossiers

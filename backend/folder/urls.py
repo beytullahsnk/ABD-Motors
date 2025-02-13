@@ -3,9 +3,9 @@ from rest_framework_nested import routers
 from .views import FolderViewSet, FileViewSet
 
 router = routers.DefaultRouter()
-router.register(r'folders', FolderViewSet, basename='folder')
+router.register(r'', FolderViewSet, basename='folder')
 
-folders_router = routers.NestedDefaultRouter(router, r'folders', lookup='folder')
+folders_router = routers.NestedDefaultRouter(router, r'', lookup='folder')
 folders_router.register(r'files', FileViewSet, basename='folder-files')
 
 urlpatterns = [

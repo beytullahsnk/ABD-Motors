@@ -16,7 +16,7 @@ class FileInline(admin.TabularInline):
 
 @admin.register(Folder)
 class FolderAdmin(admin.ModelAdmin):
-    list_display = ('client', 'vehicle', 'type_folder', 'status', 'creation_date', 'file_count')
+    list_display = ('client', 'vehicle', 'type_folder', 'status', 'creation_date')
     list_filter = ('type_folder', 'status')
     search_fields = ('client__username', 'vehicle__brand', 'vehicle__model')
     ordering = ('-creation_date',)
@@ -28,8 +28,8 @@ class FolderAdmin(admin.ModelAdmin):
 
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
-    list_display = ('folder', 'file_type', 'description', 'uploaded_at')
-    list_filter = ('file_type', 'uploaded_at')
+    list_display = ('folder', 'file_type', 'uploaded_at')
+    list_filter = ('file_type',)
     search_fields = ('folder__client__username', 'description')
     readonly_fields = ('uploaded_at', 'file_preview')
 

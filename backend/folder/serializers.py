@@ -7,7 +7,8 @@ from vehicle.models import Vehicle
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ['id', 'file_type', 'file', 'uploaded_at', 'description']
+        fields = '__all__'
+        read_only_fields = ('folder',)
 
 class FolderSerializer(serializers.ModelSerializer):
     client = UserSerializer(read_only=True)
@@ -21,6 +22,5 @@ class FolderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Folder
-        fields = ['id', 'client', 'vehicle', 'vehicle_id', 'type_folder', 
-                 'status', 'creation_date', 'modification_date', 'files']
-        read_only_fields = ['client', 'creation_date', 'modification_date'] 
+        fields = '__all__'
+        read_only_fields = ('client',) 

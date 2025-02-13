@@ -9,37 +9,40 @@
 
 ---
 
-### Installation et Configuration
-
-#### 1. Création et activation de l'environnement virtuel
+### 1. Cloner le projet
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # macOS/Linux
-venv\Scripts\activate  # Windows
+git clone [url-du-projet]
+cd ABD-Motors
 ```
 
-#### 2. Installation des dépendances
+### 2. Environnement virtuel
+```bash
+# Création
+python3 -m venv venv
+
+# Activation
+# Sur macOS/Linux :
+source venv/bin/activate
+# Sur Windows :
+venv\Scripts\activate
+```
+
+### 3. Dépendances
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-#### 3. Configuration de la base de données MySQL
-Se connecter à MySQL :
-```bash
-mysql -u root -p
-```
-Créer la base de données et l'utilisateur :
+### 4. Base de données MySQL
 ```sql
 CREATE DATABASE abdmotors CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'mmotors_user'@'localhost' IDENTIFIED BY 'abdmotors';
 GRANT ALL PRIVILEGES ON abdmotors.* TO 'mmotors_user'@'localhost';
 FLUSH PRIVILEGES;
-EXIT;
 ```
 
-#### 4. Configuration des variables d'environnement
-Créer un fichier .env à la racine du projet et y ajouter les informations suivantes :
+### 5. Configuration
+Créer un fichier `.env` à la racine du projet :
 ```ini
 DJANGO_SECRET_KEY=votre_clé_secrète_ici
 DEBUG=True
@@ -50,51 +53,84 @@ DB_HOST=localhost
 DB_PORT=3306
 ```
 
-#### 5. Appliquer les migrations
+### 6. Migrations
 ```bash
-python3 manage.py migrate
+cd backend
+python manage.py migrate
 ```
 
-#### 6. Création d'un superutilisateur
+### 7. Créer un superutilisateur
 ```bash
-python3 manage.py createsuperuser
+python manage.py createsuperuser
 ```
 
-#### 7. Lancer le serveur
+### 8. Lancer le serveur
 ```bash
-python3 manage.py runserver
+python manage.py runserver
 ```
 
----
+## Structure de l'API
 
-### Accès au projet
-- Interface d'administration : http://127.0.0.1:8000/admin/
-- API : http://127.0.0.1:8000/api/
+### Authentification
+- `POST /api/auth/token/` : Obtention du token JWT
+- `POST /api/auth/token/refresh/` : Rafraîchissement du token
 
-  
----
+### Véhicules
+- `GET /api/vehicles/` : Liste des véhicules
+- `POST /api/vehicles/` : Création d'un véhicule
+- `GET /api/vehicles/{id}/` : Détails d'un véhicule
+- `PUT/PATCH /api/vehicles/{id}/` : Modification
+- `DELETE /api/vehicles/{id}/` : Suppression
+- `POST /api/vehicles/{id}/change_state/` : Changement d'état
+- `POST /api/vehicles/{id}/assign_owner/` : Attribution d'un propriétaire
+- `POST /api/vehicles/{id}/switch_type/` : Changement de type (vente/location)
 
-### Endpoints de l'API
-#### Authentification
-- POST /api/auth/token/ : Obtenir un token JWT
-- POST /api/auth/token/refresh/ : Rafraîchir un token JWT
-#### Utilisateurs
-- GET /api/auth/utilisateurs/ : Liste des utilisateurs
-- POST /api/auth/utilisateurs/ : Créer un utilisateur
-- GET /api/auth/utilisateurs/me/ : Profil de l'utilisateur connecté
-#### Véhicules
-- GET /api/vehicules/ : Liste des véhicules
-- POST /api/vehicules/ : Ajouter un véhicule
-- GET /api/vehicules/{id}/ : Détails d'un véhicule
-#### Dossiers
-- GET /api/dossiers/ : Liste des dossiers
-- POST /api/dossiers/ : Créer un dossier
-- GET /api/dossiers/{id}/ : Détails d'un dossier
-- POST /api/dossiers/{id}/change_status/ : Changer le statut d'un dossier
+### Dossiers
+- `GET /api/folders/` : Liste des dossiers
+- `POST /api/folders/` : Création d'un dossier
+- `GET /api/folders/{id}/` : Détails d'un dossier
+- `PUT/PATCH /api/folders/{id}/` : Modification
+- `DELETE /api/folders/{id}/` : Suppression
+- `POST /api/folders/{id}/change_status/` : Changement de statut
 
----
+### Fichiers
+- `GET /api/folders/{folder_id}/files/` : Liste des fichiers
+- `POST /api/folders/{folder_id}/files/` : Ajout d'un fichier
+- `GET /api/folders/{folder_id}/files/{id}/` : Détails d'un fichier
+- `DELETE /api/folders/{folder_id}/files/{id}/` : Suppression d'un fichier
 
-### Notes
-- Assurez-vous que votre base de données MySQL est en cours d'exécution.
-- Vérifiez que le fichier .env est bien configuré.
-- En cas de problème avec les dépendances, utilisez pip freeze > requirements.txt pour mettre à jour la liste des packages nécessaires.
+## Filtres disponibles
+
+### Véhicules
+- Marque (`brand`)
+- Modèle (`model`)
+- Type d'offre (`type_offer`)
+- État (`state`)
+- Année (`year`, `min_year`, `max_year`)
+- Kilométrage (`mileage`, `min_mileage`, `max_mileage`)
+- Prix (`min_price`, `max_price`)
+
+### Dossiers
+- Type de dossier (`type_folder`)
+- Statut (`status`)
+
+## Accès
+- Interface d'administration : `http://127.0.0.1:8000/admin/`
+- API Root : `http://127.0.0.1:8000/api/`
+
+## Rôles et Permissions
+- **Admin** : Accès complet
+- **Gestionnaire** : Gestion des véhicules et dossiers
+- **Client** : Consultation et création de dossiers
+
+## Notes de développement
+- L'API utilise Django REST Framework
+- Authentification via JWT (JSON Web Tokens)
+- Support CORS activé pour le développement
+- Filtrage et recherche disponibles sur les véhicules
+- Upload de fichiers supporté pour les dossiers
+
+## Sécurité
+- Les tokens JWT expirent après 1 jour
+- Les tokens de rafraîchissement sont valides 7 jours
+- CORS configuré pour accepter toutes les origines en développement

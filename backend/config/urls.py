@@ -28,4 +28,5 @@ urlpatterns = [
     path('api/vehicles/', include('vehicle.urls')),
     path('api/folders/', include('folder.urls')),
     path('', RedirectView.as_view(url='/admin/', permanent=True)),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
+  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

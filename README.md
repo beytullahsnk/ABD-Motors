@@ -139,7 +139,8 @@ python3 manage.py migrate
 
 ## Auteurs
 
-- Groupe 9 - HETIC
+### Groupe 9 - HETIC :
+
 - Elijah TRAORE
 - Abdallah SAOUD
 - Beytullah SONKAYA

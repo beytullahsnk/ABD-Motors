@@ -35,6 +35,11 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 # AWS Configuration
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-west-3')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+AWS_QUERYSTRING_AUTH = False
 
 # RDS Configuration
 DATABASES = {
@@ -50,14 +55,6 @@ DATABASES = {
         }
     }
 }
-
-# S3 Configuration
-AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-west-3')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
-AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-AWS_DEFAULT_ACL = 'public-read'
-AWS_LOCATION = 'static'
 
 # Lightsail Configuration
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
@@ -110,6 +107,7 @@ SIMPLE_JWT = {
 # Configuration CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:8000",
     "https://abdmotors-groupe9.com",
     "https://*.amazonaws.com",
 ]
@@ -169,15 +167,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'user.User'
 
-# Configuration du stockage
-if DEBUG:  # En développement
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-    STATIC_URL = '/static/'
-    MEDIA_URL = '/media/'
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-else:
+# Simplifiez la configuration du stockage
+USE_S3 = os.getenv('USE_S3', 'False') == 'True'
+
+if USE_S3:
     STATICFILES_STORAGE = 'config.storage_backends.StaticStorage'
     DEFAULT_FILE_STORAGE = 'config.storage_backends.MediaStorage'
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+else:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+
+# Ces configurations doivent être toujours présentes
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

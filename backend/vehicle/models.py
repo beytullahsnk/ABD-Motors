@@ -24,6 +24,7 @@ class Vehicle(models.Model):
     type_offer = models.CharField(max_length=20, choices=TYPES)
     state = models.CharField(max_length=20, choices=STATES)
     description = models.TextField()
+    image = models.ImageField(upload_to='vehicles/', null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
     
     # Nouvelles options de location

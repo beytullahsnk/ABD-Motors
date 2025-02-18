@@ -4,8 +4,8 @@ from django.db import models
 class User(AbstractUser):
     ROLES = (
         ('CLIENT', 'Client'),
-        ('MANAGER', 'Manager'),
-        ('ADMIN', 'Administrator')
+        ('GESTIONNAIRE', 'Gestionnaire'),
+        ('ADMIN', 'Administrateur')
     )
     role = models.CharField(max_length=20, choices=ROLES, default='CLIENT')
     phone = models.CharField(max_length=15, null=True, blank=True)

@@ -16,17 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from health_check.views import MainView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/', include('user.urls')),
     path('api/vehicles/', include('vehicle.urls')),
     path('api/folders/', include('folder.urls')),
+    path('health/', MainView.as_view(), name='health_check'),  # Pour Lightsail
     path('', RedirectView.as_view(url='/admin/', permanent=True)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,5 +1,6 @@
 from django.db import models
 from user.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Models vehicle.
 
@@ -17,8 +18,15 @@ class Vehicle(models.Model):
     
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
-    year = models.IntegerField()
-    mileage = models.IntegerField()
+    year = models.IntegerField(
+        validators=[
+            MinValueValidator(1900),
+            MaxValueValidator(2100)
+        ]
+    )
+    mileage = models.IntegerField(
+        validators=[MinValueValidator(0)]
+    )
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     rental_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     type_offer = models.CharField(max_length=20, choices=TYPES)

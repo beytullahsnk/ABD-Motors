@@ -2,127 +2,153 @@
 
 Backend Django pour le projet ABD-Motors (Groupe 9). Cette API gère les véhicules, les dossiers et les utilisateurs.
 
-## Technologies
+## Prérequis
 
 - Python 3.13
-- Django 4.2.19
-- PostgreSQL (AWS RDS)
-- AWS S3 pour le stockage des fichiers
-- JWT pour l'authentification
+- PostgreSQL
+- Un compte AWS avec accès S3
+- Git
 
-## Configuration
+## Installation
 
-1. Créez un environnement virtuel :
+### Sur macOS
+
+1. **Installation de Python** :
+    ```bash
+    # Installer Homebrew si ce n'est pas déjà fait
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    # Installer Python
+    brew install python
+    
+    # Vérifier l'installation
+    python3 --version
+    ```
+
+### Sur Windows
+- Téléchargez et installez Python depuis [python.org](https://www.python.org/downloads/)
+
+### Sur Linux
 ```bash
-python -m venv venv
-source venv/bin/activate  # Sur macOS/Linux
+sudo apt-get update
+sudo apt-get install python3 python3-pip
 ```
 
-2. Installez les dépendances :
-```bash
-pip install -r requirements.txt
-```
+### Configuration du projet
 
-3. Créez un fichier `.env` à la racine :
-```env
-# Django
-DJANGO_SECRET_KEY=votre_clé_secrète_ici
-DEBUG=True
+1. **Clonez le repository** :
+    ```bash
+    git clone https://github.com/beytullahsnk/ABD-Motors.git
+    cd ABD-Motors
+    ```
 
-# Base de données RDS
-DB_NAME=abdmotors_groupe_9
-DB_USER=groupe9
-DB_PASSWORD=groupe9@
-DB_HOST=hetic.cd5ufp6fsve3.us-east-1.rds.amazonaws.com
-DB_PORT=5432
+2. **Créez et activez l'environnement virtuel** :
+    ```bash
+    # Windows
+    python -m venv venv
+    venv\Scripts\activate
+    
+    # macOS/Linux
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
 
-# AWS S3
-AWS_ACCESS_KEY_ID=votre_access_key_id_ici
-AWS_SECRET_ACCESS_KEY=votre_secret_access_key_ici
-AWS_STORAGE_BUCKET_NAME=abdmotors-groupe9
-AWS_S3_REGION_NAME=eu-west-3
+3. **Installez les dépendances** :
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-# Allowed Hosts
-ALLOWED_HOSTS=localhost,127.0.0.1
-```
+4. **Configuration de l'environnement** :
+    Créez un fichier `.env` à la racine avec :
+    ```env
+    # Django
+    DJANGO_SECRET_KEY=votre_clé_secrète
+    DEBUG=True
+    USE_S3=True
+    
+    # Base de données RDS
+    DB_NAME=votre_db_name
+    DB_USER=votre_db_user
+    DB_PASSWORD=votre_db_password
+    DB_HOST=votre_db_host
+    DB_PORT=5432
 
-4. Appliquez les migrations :
-```bash
-cd backend
-python manage.py migrate
-```
+    # AWS S3
+    AWS_ACCESS_KEY_ID=votre_access_key_id
+    AWS_SECRET_ACCESS_KEY=votre_secret_access_key
+    AWS_STORAGE_BUCKET_NAME=abdmotors-groupe9
+    AWS_S3_REGION_NAME=eu-west-3
+   
+    # Allowed Hosts
+    ALLOWED_HOSTS=localhost,127.0.0.1
+    ```
 
-5. Créez un superutilisateur :
-```bash
-python manage.py createsuperuser
-```
+5. **Initialisation de la base de données** :
+    ```bash
+    cd backend
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py createsuperuser
+    ```
 
-## Structure du Projet
+6. **Collecte des fichiers statiques** (si USE_S3=True) :
+    ```bash
+    python manage.py collectstatic --noinput
+    ```
 
-```
-backend/
-├── config/             # Configuration Django
-├── user/              # Gestion des utilisateurs
-├── vehicle/           # Gestion des véhicules
-└── folder/            # Gestion des dossiers
-```
+7. **Lancement du serveur** :
+    ```bash
+    python manage.py runserver
+    ```
 
-## API Endpoints
+## Configuration du stockage
 
-### Authentification
+Le projet supporte deux modes de stockage :
+
+1. **Stockage Local** (développement) :
+   ```env
+   DEBUG=True
+   USE_S3=False
+   ```
+
+2. **Stockage S3** (production) :
+   ```env
+   DEBUG=False  # En production
+   USE_S3=True
+   ```
+   - Assurez-vous que vos credentials AWS sont corrects
+   - Exécutez `python manage.py collectstatic`
+
+## Utilisation
+
+### Accès aux interfaces
+- **Admin** : http://localhost:8000/admin/
+- **API** : http://localhost:8000/api/
+
+### API Endpoints
+
+#### Authentification
 - POST `/api/auth/token/` - Obtenir un token JWT
 - POST `/api/auth/register/` - Créer un compte
 
-### Véhicules
+#### Véhicules
 - GET `/api/vehicles/` - Liste des véhicules
 - POST `/api/vehicles/` - Créer un véhicule
 - GET `/api/vehicles/{id}/` - Détails d'un véhicule
-- PUT `/api/vehicles/{id}/` - Modifier un véhicule
-- DELETE `/api/vehicles/{id}/` - Supprimer un véhicule
 
-### Dossiers
+#### Dossiers
 - GET `/api/folders/` - Liste des dossiers
 - POST `/api/folders/` - Créer un dossier
 - GET `/api/folders/{id}/` - Détails d'un dossier
-- PUT `/api/folders/{id}/` - Modifier un dossier
-- DELETE `/api/folders/{id}/` - Supprimer un dossier
 
-## Stockage des Fichiers
+## Déploiement
 
-Les fichiers sont stockés sur AWS S3 :
-- En développement : stockage local
-- En production : bucket S3 `abdmotors-groupe9`
-
-## Développement
-
-1. Lancez le serveur :
+Pour déployer en production :
 ```bash
-python manage.py runserver
+chmod +x deploy.sh
+./deploy.sh
 ```
 
-2. Accédez à :
-- API : http://localhost:8000/api/
-- Admin : http://localhost:8000/admin/
+## Support
 
-## Production
-
-1. Configurez les variables d'environnement :
-```env
-DEBUG=False
-ALLOWED_HOSTS=votre-domaine.com
-```
-
-2. Collectez les fichiers statiques :
-```bash
-python manage.py collectstatic --noinput
-```
-
-## Contribution
-
-1. Créez une branche pour votre fonctionnalité
-2. Committez vos changements
-3. Créez une Pull Request
-
-## Auteurs
-
-- Groupe 9 - HETIC
+Pour toute question ou problème, veuillez créer une issue dans le repository.

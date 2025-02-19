@@ -7,9 +7,13 @@ class User(AbstractUser):
         ('MANAGER', 'Manager'),
         ('ADMIN', 'Administrator')
     )
+    email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, choices=ROLES, default='CLIENT')
     phone = models.CharField(max_length=15, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
     # Ajout des related_name pour résoudre les conflits
     groups = models.ManyToManyField(
@@ -32,4 +36,4 @@ class User(AbstractUser):
         swappable = 'AUTH_USER_MODEL'
 
     def __str__(self):
-        return f"{self.username} - {self.role}"
+        return f"{self.email} - {self.role}"

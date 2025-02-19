@@ -19,14 +19,15 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-from health_check.views import MainView
+# from health_check.views import MainView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('user.urls')),
     path('api/vehicles/', include('vehicle.urls')),
     path('api/folders/', include('folder.urls')),
-    path('health/', MainView.as_view(), name='health_check'),  # Pour Lightsail
+    # path('health/', MainView.as_view(), name='health_check'),  # Pour Lightsail
+    # Rediriger la racine vers l'admin
     path('', RedirectView.as_view(url='/admin/', permanent=True)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

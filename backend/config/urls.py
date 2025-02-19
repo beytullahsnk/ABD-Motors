@@ -16,15 +16,30 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 
+from user.views import UserViewSet
+from vehicle.views import VehicleViewSet
+from folder.views import FileViewSet
+
+# Création du routeur
+router = DefaultRouter()
+router.register(r'users', UserViewSet)
+router.register(r'vehicles', VehicleViewSet)
+router.register(r'documents', FileViewSet)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/auth/', include('user.urls')),
+    path('api/', include(router.urls)),
+    path('api/auth/', include([
+        path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+        path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+        path('', include('user.urls')),
+    ])),
     path('api/vehicles/', include('vehicle.urls')),
     path('api/folders/', include('folder.urls')),
     path('', RedirectView.as_view(url='/admin/', permanent=True)),

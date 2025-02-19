@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -44,18 +44,16 @@ class FolderViewSet(viewsets.ModelViewSet):
         )
 
 class FileViewSet(viewsets.ModelViewSet):
+    queryset = File.objects.all()
     serializer_class = FileSerializer
-    parser_classes = (MultiPartParser, FormParser)
-    permission_classes = [IsAuthenticated, IsOwnerOrStaff]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return File.objects.filter(folder_id=self.kwargs['folder_pk'])
+        """Filtre les documents pour ne montrer que ceux de l'utilisateur actuel"""
+        return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        folder = Folder.objects.get(id=self.kwargs['folder_pk'])
-        if not IsOwnerOrStaff().has_object_permission(self.request, self, folder):
-            raise PermissionDenied()
-        serializer.save(folder=folder)
+        serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
         if not IsOwnerOrStaff().has_object_permission(self.request, self, serializer.instance.folder):

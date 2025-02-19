@@ -3,7 +3,7 @@ from .models import Vehicle
 
 @admin.register(Vehicle)
 class VehicleAdmin(admin.ModelAdmin):
-    list_display = ('brand', 'model', 'year', 'type_offer', 'state', 'sale_price', 'rental_price')
-    list_filter = ('type_offer', 'state', 'brand')
+    list_display = ('brand', 'model', 'year', 'daily_rate', 'is_available')
+    list_filter = ('fuel_type', 'transmission', 'is_available')
     search_fields = ('brand', 'model', 'description')
-    ordering = ('-date_added',)
+    ordering = ('-created_at',)

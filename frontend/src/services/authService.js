@@ -5,14 +5,33 @@ const API_URL = 'http://localhost:8000/api/auth';
 const authService = {
     login: async (email, password) => {
         try {
-            const response = await axios.post(`${API_URL}/token/`, {
+            // Obtenir le token
+            const tokenResponse = await axios.post(`${API_URL}/token/`, {
                 email,
                 password
             });
-            if (response.data.access) {
-                localStorage.setItem('user', JSON.stringify(response.data));
-            }
-            return response.data;
+            console.log('Token response:', tokenResponse.data);
+
+            // Récupérer les informations de l'utilisateur
+            const userResponse = await axios.get(`${API_URL}/users/`, {
+                headers: { Authorization: `Bearer ${tokenResponse.data.access}` }
+            });
+            console.log('User response:', userResponse.data);
+
+            // Trouver l'utilisateur correspondant à l'email
+            const userInfo = userResponse.data.find(u => u.email === email);
+            console.log('User info:', userInfo);
+
+            // Combiner le token et les informations utilisateur
+            const userData = {
+                ...userInfo,
+                access: tokenResponse.data.access,
+                refresh: tokenResponse.data.refresh
+            };
+            
+            console.log('Final user data:', userData);
+            localStorage.setItem('user', JSON.stringify(userData));
+            return userData;
         } catch (error) {
             console.error('Login error:', error.response?.data || error.message);
             throw error;
@@ -69,7 +88,12 @@ const authService = {
 
     getCurrentUser: () => {
         const user = localStorage.getItem('user');
-        return user ? JSON.parse(user) : null;
+        if (user) {
+            const userData = JSON.parse(user);
+            console.log('Current user data:', userData);
+            return userData;
+        }
+        return null;
     },
 };
 

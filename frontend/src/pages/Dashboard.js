@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
     Container,
@@ -6,83 +6,112 @@ import {
     Paper,
     Typography,
     Box,
-    Button
+    Button,
+    CircularProgress,
+    Alert
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { getAvailableVehicles } from '../services/vehicleService';
+import VehicleCard from '../components/VehicleCard';
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [vehicles, setVehicles] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchVehicles = async () => {
+            try {
+                const data = await getAvailableVehicles();
+                console.log('Fetched vehicles:', data);
+                setVehicles(data);
+                setLoading(false);
+            } catch (err) {
+                console.error('Error in dashboard:', err);
+                setError(err.response?.data?.detail || 'Erreur lors du chargement des véhicules');
+                setLoading(false);
+            }
+        };
+
+        fetchVehicles();
+    }, []);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
+    useEffect(() => {
+        if (user) {
+            console.log('User in dashboard:', user);
+            console.log('First name:', user.first_name);
+            console.log('Last name:', user.last_name);
+        }
+    }, [user]);
+
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    // Si pas d'utilisateur, rediriger vers la page de connexion
+    if (!user) {
+        navigate('/login');
+        return null;
+    }
+
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            {/* En-tête avec profil utilisateur */}
             <Grid container spacing={3}>
-                {/* En-tête */}
                 <Grid item xs={12}>
-                    <Paper sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography component="h1" variant="h5">
-                            Tableau de bord
-                        </Typography>
-                        <Button variant="contained" color="primary" onClick={() => navigate('/reservations/new')}>
-                            Nouvelle réservation
-                        </Button>
-                    </Paper>
-                </Grid>
-
-                {/* Informations utilisateur */}
-                <Grid item xs={12} md={4}>
-                    <Paper sx={{ p: 2 }}>
-                        <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                            Profil
-                        </Typography>
-                        <Box sx={{ mt: 2 }}>
-                            <Typography variant="body1">
-                                Nom: {user?.firstName} {user?.lastName}
+                    <Paper sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                        <Box>
+                            <Typography variant="h6" component="h1">
+                                Bienvenue, {user.first_name} {user.last_name}
                             </Typography>
-                            <Typography variant="body1">
-                                Email: {user?.email}
+                            <Typography variant="body2" color="text.secondary">
+                                {user.email}
                             </Typography>
                         </Box>
                         <Button
                             variant="outlined"
                             color="secondary"
                             onClick={handleLogout}
-                            sx={{ mt: 2 }}
                         >
                             Se déconnecter
                         </Button>
                     </Paper>
                 </Grid>
 
-                {/* Réservations en cours */}
-                <Grid item xs={12} md={8}>
-                    <Paper sx={{ p: 2 }}>
-                        <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                            Mes réservations en cours
-                        </Typography>
-                        {/* Liste des réservations à implémenter */}
-                        <Typography variant="body1" sx={{ mt: 2 }}>
-                            Aucune réservation en cours
-                        </Typography>
-                    </Paper>
-                </Grid>
-
-                {/* Historique des réservations */}
+                {/* Liste des véhicules disponibles */}
                 <Grid item xs={12}>
-                    <Paper sx={{ p: 2 }}>
-                        <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                            Historique des réservations
-                        </Typography>
-                        {/* Historique à implémenter */}
-                        <Typography variant="body1" sx={{ mt: 2 }}>
-                            Aucun historique disponible
-                        </Typography>
-                    </Paper>
+                    <Typography variant="h5" gutterBottom>
+                        Véhicules disponibles
+                    </Typography>
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
+                    {vehicles.length === 0 && !error ? (
+                        <Alert severity="info">
+                            Aucun véhicule disponible pour le moment
+                        </Alert>
+                    ) : (
+                        <Grid container spacing={3}>
+                            {vehicles.map((vehicle) => (
+                                <Grid item xs={12} sm={6} md={4} key={vehicle.id}>
+                                    <VehicleCard vehicle={vehicle} />
+                                </Grid>
+                            ))}
+                        </Grid>
+                    )}
                 </Grid>
             </Grid>
         </Container>

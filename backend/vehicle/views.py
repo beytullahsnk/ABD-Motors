@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from user.permissions import IsGestionnaireOrAdmin
 from user.models import User
 from django.db import models
+from django.conf import settings
+import boto3
 
 # Create your views here.
 
@@ -106,3 +108,42 @@ class VehicleViewSet(viewsets.ModelViewSet):
         
         vehicle.save()
         return Response(self.get_serializer(vehicle).data)
+
+    @action(detail=True, methods=['get'])
+    def check_image(self, request, pk=None):
+        vehicle = self.get_object()
+        if not vehicle.image:
+            return Response({
+                'status': 'error',
+                'message': 'Pas d\'image pour ce véhicule'
+            })
+
+        # Vérifier si l'image existe dans S3
+        if settings.USE_S3:
+            s3 = boto3.client('s3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
+            try:
+                # Construire le chemin S3
+                s3_path = f"media/vehicles/{vehicle.image.name.split('/')[-1]}"
+                s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_path)
+                exists_in_s3 = True
+            except:
+                exists_in_s3 = False
+
+            return Response({
+                'status': 'success',
+                'image_name': vehicle.image.name,
+                'image_url': vehicle.image.url,
+                'exists_in_s3': exists_in_s3,
+                's3_path': s3_path if exists_in_s3 else None
+            })
+        
+        return Response({
+            'status': 'success',
+            'image_name': vehicle.image.name,
+            'image_url': vehicle.image.url,
+            'storage': 'local'
+        })

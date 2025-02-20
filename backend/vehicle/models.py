@@ -1,6 +1,9 @@
 from django.db import models
 from user.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Models vehicle.
 
@@ -64,3 +67,14 @@ class Vehicle(models.Model):
 
     def __str__(self):
         return f"{self.brand} {self.model} ({self.type_offer})"
+
+    def save(self, *args, **kwargs):
+        # Log avant la sauvegarde
+        if self.image:
+            logger.info(f"Saving vehicle {self.brand} {self.model} with image: {self.image.name}")
+        
+        super().save(*args, **kwargs)
+        
+        # Log après la sauvegarde
+        if self.image:
+            logger.info(f"Vehicle saved. Image URL: {self.image.url}")

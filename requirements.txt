@@ -24,4 +24,3 @@ six==1.17.0
 sqlparse==0.5.3
 urllib3==2.3.0
 whitenoise==6.9.0
->>>>>>> 50e6f28 (Add pkg-config to project dependencies)

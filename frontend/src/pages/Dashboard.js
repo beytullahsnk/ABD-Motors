@@ -15,6 +15,8 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    IconButton,
+    Collapse,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { getVehicles } from '../services/vehicleService';
@@ -23,6 +25,8 @@ import VehicleCard from '../components/VehicleCard';
 import LoadingScreen from '../components/LoadingScreen';
 import ErrorAlert from '../components/ErrorAlert';
 import { formatDate, formatPrice } from '../utils/dateUtils';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { 
     FOLDER_STATUS_LABELS, 
     FOLDER_STATUS_COLORS 
@@ -30,20 +34,108 @@ import {
 
 const getFolderStatusColor = (status) => {
     switch (status) {
-        case 'PENDING': return 'warning';
-        case 'APPROVED': return 'success';
-        case 'REJECTED': return 'error';
-        default: return 'default';
+        case 'PENDING':
+            return 'warning';
+        case 'APPROVED':
+            return 'success';
+        case 'REJECTED':
+            return 'error';
+        default:
+            return 'default';
     }
 };
 
 const getFolderStatusLabel = (status) => {
     switch (status) {
-        case 'PENDING': return 'En attente';
-        case 'APPROVED': return 'Approuvé';
-        case 'REJECTED': return 'Refusé';
-        default: return status;
+        case 'PENDING':
+            return 'En attente';
+        case 'APPROVED':
+            return 'Approuvé';
+        case 'REJECTED':
+            return 'Refusé';
+        default:
+            return status;
     }
+};
+
+const getFileTypeLabel = (fileType) => {
+    switch (fileType) {
+        case 'ID_CARD':
+            return 'Carte d\'identité';
+        case 'DRIVER_LICENSE':
+            return 'Permis de conduire';
+        case 'PROOF_ADDRESS':
+            return 'Justificatif de domicile';
+        case 'INCOME_PROOF':
+            return 'Justificatif de revenus';
+        case 'INSURANCE':
+            return 'Attestation d\'assurance';
+        case 'OTHER':
+            return 'Autre document';
+        default:
+            return fileType;
+    }
+};
+
+const FolderRow = ({ folder }) => {
+    const [open, setOpen] = useState(false);
+    const navigate = useNavigate();
+
+    return (
+        <>
+            <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+                <TableCell>
+                    <IconButton
+                        size="small"
+                        onClick={() => setOpen(!open)}
+                    >
+                        {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </IconButton>
+                </TableCell>
+                <TableCell>
+                    <Typography variant="subtitle2">
+                        {folder.vehicle.brand} {folder.vehicle.model}
+                    </Typography>
+                </TableCell>
+                <TableCell>
+                    <Chip
+                        label={getFolderStatusLabel(folder.status)}
+                        color={getFolderStatusColor(folder.status)}
+                        size="small"
+                    />
+                </TableCell>
+                <TableCell>
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => navigate(`/vehicles/${folder.vehicle.id}`)}
+                    >
+                        Voir le véhicule
+                    </Button>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+                    <Collapse in={open} timeout="auto" unmountOnExit>
+                        <Box sx={{ margin: 2 }}>
+                            <Typography variant="subtitle2" gutterBottom>
+                                Documents fournis:
+                            </Typography>
+                            <Stack direction="column" spacing={1}>
+                                {folder.files && folder.files.map((file, index) => (
+                                    <Box key={index}>
+                                        <Typography variant="body2">
+                                            {getFileTypeLabel(file.file_type)}
+                                        </Typography>
+                                    </Box>
+                                ))}
+                            </Stack>
+                        </Box>
+                    </Collapse>
+                </TableCell>
+            </TableRow>
+        </>
+    );
 };
 
 const Dashboard = () => {
@@ -109,28 +201,15 @@ const Dashboard = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
+                                    <TableCell width={50} />
                                     <TableCell>Véhicule</TableCell>
-                                    <TableCell>Dates</TableCell>
                                     <TableCell>Statut</TableCell>
+                                    <TableCell>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {folders.map((folder) => (
-                                    <TableRow key={folder.id}>
-                                        <TableCell>
-                                            {folder.vehicle.brand} {folder.vehicle.model}
-                                        </TableCell>
-                                        <TableCell>
-                                            Du {formatDate(folder.start_date)} au {formatDate(folder.end_date)}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={FOLDER_STATUS_LABELS[folder.status]}
-                                                color={FOLDER_STATUS_COLORS[folder.status]}
-                                                size="small"
-                                            />
-                                        </TableCell>
-                                    </TableRow>
+                                    <FolderRow key={folder.id} folder={folder} />
                                 ))}
                             </TableBody>
                         </Table>

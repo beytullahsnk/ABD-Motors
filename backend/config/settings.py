@@ -36,15 +36,10 @@ AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-west-3')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
-AWS_DEFAULT_ACL = 'public-read'
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
 AWS_QUERYSTRING_AUTH = False
-AWS_DEFAULT_ACL = 'public-read'
-AWS_BUCKET_ACL = 'public-read'
-AWS_S3_ADDRESSING_STYLE = 'virtual'
-AWS_S3_URL_PROTOCOL = 'https:'
 
 # RDS Configuration
 DATABASES = {
@@ -193,3 +188,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 if os.getenv('USE_S3', 'False') == 'True':
     DEFAULT_FILE_STORAGE = 'config.storage_backends.MediaStorage'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+
+# AWS Configuration
+AWS_S3_ADDRESSING_STYLE = 'virtual'
+AWS_S3_URL_PROTOCOL = 'https:'

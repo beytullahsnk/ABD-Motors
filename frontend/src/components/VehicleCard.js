@@ -12,6 +12,35 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '../utils/dateUtils';
 
+const getStatusColor = (state) => {
+    switch (state) {
+        case 'AVAILABLE':
+            return 'success';
+        case 'RESERVED':
+            return 'warning';
+        case 'SOLD':
+        case 'RENTED':
+            return 'error';
+        default:
+            return 'default';
+    }
+};
+
+const getStatusLabel = (state) => {
+    switch (state) {
+        case 'AVAILABLE':
+            return 'Disponible';
+        case 'RESERVED':
+            return 'Réservé';
+        case 'SOLD':
+            return 'Vendu';
+        case 'RENTED':
+            return 'En location';
+        default:
+            return state;
+    }
+};
+
 const VehicleCard = ({ vehicle }) => {
     const navigate = useNavigate();
 
@@ -25,6 +54,10 @@ const VehicleCard = ({ vehicle }) => {
     };
 
     const getActionButton = () => {
+        if (vehicle.state !== 'AVAILABLE') {
+            return null;
+        }
+
         if (vehicle.type_offer === 'RENTAL') {
             return (
                 <Button 
@@ -67,15 +100,27 @@ const VehicleCard = ({ vehicle }) => {
             }}
             onClick={() => navigate(`/vehicles/${vehicle.id}`)}
         >
-            <CardMedia
-                component="img"
-                height="200"
-                image={vehicle.image || '/placeholder-car.jpg'}
-                alt={`${vehicle.brand} ${vehicle.model}`}
-                onError={(e) => {
-                    e.target.src = '/placeholder-car.jpg';
-                }}
-            />
+            <Box sx={{ position: 'relative' }}>
+                <CardMedia
+                    component="img"
+                    height="200"
+                    image={vehicle.image || '/placeholder-car.jpg'}
+                    alt={`${vehicle.brand} ${vehicle.model}`}
+                    onError={(e) => {
+                        e.target.src = '/placeholder-car.jpg';
+                    }}
+                />
+                <Chip 
+                    label={getStatusLabel(vehicle.state)}
+                    color={getStatusColor(vehicle.state)}
+                    size="small"
+                    sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                    }}
+                />
+            </Box>
             <CardContent sx={{ flexGrow: 1 }}>
                 <Typography gutterBottom variant="h5" component="h2">
                     {vehicle.brand} {vehicle.model}

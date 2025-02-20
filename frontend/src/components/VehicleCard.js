@@ -15,6 +15,45 @@ import { formatPrice } from '../utils/dateUtils';
 const VehicleCard = ({ vehicle }) => {
     const navigate = useNavigate();
 
+    const getPriceDisplay = () => {
+        if (vehicle.type_offer === 'RENTAL') {
+            return `${formatPrice(vehicle.rental_price)}/jour`;
+        } else if (vehicle.type_offer === 'SALE') {
+            return formatPrice(vehicle.sale_price);
+        }
+        return 'Prix non disponible';
+    };
+
+    const getActionButton = () => {
+        if (vehicle.type_offer === 'RENTAL') {
+            return (
+                <Button 
+                    size="small" 
+                    variant="contained"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/vehicles/${vehicle.id}/reserve`);
+                    }}
+                >
+                    Louer
+                </Button>
+            );
+        } else if (vehicle.type_offer === 'SALE') {
+            return (
+                <Button 
+                    size="small" 
+                    variant="contained"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/vehicles/${vehicle.id}/purchase`);
+                    }}
+                >
+                    Acheter
+                </Button>
+            );
+        }
+    };
+
     return (
         <Card 
             sx={{ 
@@ -45,6 +84,11 @@ const VehicleCard = ({ vehicle }) => {
                     {vehicle.year} - {vehicle.mileage} km
                 </Typography>
                 <Stack direction="row" spacing={1} mb={2}>
+                    <Chip 
+                        label={vehicle.type_offer === 'RENTAL' ? 'À louer' : 'À vendre'} 
+                        size="small" 
+                        color={vehicle.type_offer === 'RENTAL' ? 'primary' : 'secondary'}
+                    />
                     {vehicle.has_insurance && (
                         <Chip label="Assuré" size="small" color="success" />
                     )}
@@ -54,18 +98,9 @@ const VehicleCard = ({ vehicle }) => {
                 </Stack>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="h6" color="primary">
-                        {formatPrice(vehicle.rental_price)}
+                        {getPriceDisplay()}
                     </Typography>
-                    <Button 
-                        size="small" 
-                        variant="contained"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/vehicles/${vehicle.id}/reserve`);
-                        }}
-                    >
-                        Réserver
-                    </Button>
+                    {getActionButton()}
                 </Box>
             </CardContent>
         </Card>

@@ -15,35 +15,6 @@ import { formatPrice } from '../utils/dateUtils';
 const VehicleCard = ({ vehicle }) => {
     const navigate = useNavigate();
 
-    // Debug pour voir l'URL de l'image
-    console.log('Vehicle image data:', {
-        vehicle: vehicle.brand + ' ' + vehicle.model,
-        imageUrl: vehicle.image_url,
-        imagePath: vehicle.image,
-        fullImageUrl: vehicle.image_url ? new URL(vehicle.image_url).href : null
-    });
-
-    // Fonction pour vérifier si l'URL est accessible
-    const checkImageUrl = async (url) => {
-        try {
-            const response = await fetch(url, { method: 'HEAD' });
-            console.log('Image URL check:', {
-                url,
-                status: response.status,
-                ok: response.ok
-            });
-        } catch (error) {
-            console.error('Image URL check failed:', error);
-        }
-    };
-
-    // Vérifier l'URL si elle existe
-    React.useEffect(() => {
-        if (vehicle.image_url) {
-            checkImageUrl(vehicle.image_url);
-        }
-    }, [vehicle.image_url]);
-
     return (
         <Card 
             sx={{ 
@@ -57,34 +28,15 @@ const VehicleCard = ({ vehicle }) => {
             }}
             onClick={() => navigate(`/vehicles/${vehicle.id}`)}
         >
-            <Box sx={{ position: 'relative', paddingTop: '56.25%' /* 16:9 aspect ratio */ }}>
-                <CardMedia
-                    component="img"
-                    sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                    }}
-                    image={vehicle.image_url}
-                    alt={`${vehicle.brand} ${vehicle.model}`}
-                    onError={(e) => {
-                        console.error('Image load error:', {
-                            vehicle: vehicle.brand + ' ' + vehicle.model,
-                            attemptedUrl: vehicle.image_url,
-                            error: e.error,
-                            imageDetails: {
-                                naturalWidth: e.target.naturalWidth,
-                                naturalHeight: e.target.naturalHeight,
-                                currentSrc: e.target.currentSrc
-                            }
-                        });
-                        e.target.src = '/images/placeholder-car.jpg';
-                    }}
-                />
-            </Box>
+            <CardMedia
+                component="img"
+                height="200"
+                image={vehicle.image || '/placeholder-car.jpg'}
+                alt={`${vehicle.brand} ${vehicle.model}`}
+                onError={(e) => {
+                    e.target.src = '/placeholder-car.jpg';
+                }}
+            />
             <CardContent sx={{ flexGrow: 1 }}>
                 <Typography gutterBottom variant="h5" component="h2">
                     {vehicle.brand} {vehicle.model}
@@ -102,7 +54,7 @@ const VehicleCard = ({ vehicle }) => {
                 </Stack>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="h6" color="primary">
-                        {formatPrice(vehicle.rental_price)}/jour
+                        {formatPrice(vehicle.rental_price)}
                     </Typography>
                     <Button 
                         size="small" 

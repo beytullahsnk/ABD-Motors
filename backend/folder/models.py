@@ -1,6 +1,7 @@
 from django.db import models
 from user.models import User
 from vehicle.models import Vehicle
+from django.conf import settings
 
 class Folder(models.Model):
     STATUS = (
@@ -28,24 +29,32 @@ class Folder(models.Model):
         return f"Folder {self.type_folder} - {self.client.username}"
 
 class File(models.Model):
-    FILE_TYPES = (
+    DOCUMENT_TYPES = (
         ('ID_CARD', 'Carte d\'identité'),
-        ('DRIVER_LICENSE', 'Permis de conduire'),
-        ('PROOF_ADDRESS', 'Justificatif de domicile'),
-        ('INCOME_PROOF', 'Justificatif de revenus'),
-        ('INSURANCE', 'Attestation d\'assurance'),
-        ('OTHER', 'Autre document'),
+        ('DRIVING_LICENSE', 'Permis de conduire'),
+        ('SIGNED_CONTRACT', 'Contrat signé'),
+        ('OTHER', 'Autre')
     )
-    
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='files')
-    file_type = models.CharField(max_length=20, choices=FILE_TYPES)
-    file = models.FileField(upload_to='folder_files/%Y/%m/%d/')
-    description = models.TextField(blank=True)
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='documents'
+    )
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE,
+        related_name='documents'
+    )
+    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPES, default='OTHER')
+    file = models.FileField(upload_to='documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+    verification_date = models.DateTimeField(null=True, blank=True)
+    verification_notes = models.TextField(blank=True, null=True)
 
     class Meta:
-        db_table = 'files'
         ordering = ['-uploaded_at']
 
     def __str__(self):
-        return f"{self.get_file_type_display()} - {self.folder}"
+        return f"{self.get_document_type_display()} - {self.user.email}"

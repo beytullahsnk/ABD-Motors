@@ -24,7 +24,7 @@ import Profile from './pages/Profile';
 // Theme
 import theme from './theme';
 
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children, requireAdmin }) => {
     const { user, loading } = useAuth();
 
     if (loading) {
@@ -33,6 +33,10 @@ const PrivateRoute = ({ children }) => {
 
     if (!user) {
         return <Navigate to="/login" />;
+    }
+
+    if (requireAdmin && user.role !== 'ADMIN') {
+        return <Navigate to="/dashboard" />;
     }
 
     return (

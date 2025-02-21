@@ -83,7 +83,12 @@ const Navbar = () => {
                                     width: 40,
                                     height: 40,
                                     fontWeight: 600,
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                        opacity: 0.8
+                                    }
                                 }}
+                                onClick={() => navigate('/profile')}
                             >
                                 {user.first_name?.[0]?.toUpperCase()}
                             </Avatar>

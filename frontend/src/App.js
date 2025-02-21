@@ -20,6 +20,7 @@ import VehicleList from './pages/VehicleList';
 import VehicleDetail from './pages/VehicleDetail';
 import FolderCreation from './pages/FolderCreation';
 import PurchaseCreation from './pages/PurchaseCreation';
+import Profile from './pages/Profile';
 
 // Theme
 import theme from './theme';
@@ -92,6 +93,14 @@ const App = () => {
                                 element={
                                     <PrivateRoute>
                                         <PurchaseCreation />
+                                    </PrivateRoute>
+                                }
+                            />
+                            <Route
+                                path="/profile"
+                                element={
+                                    <PrivateRoute>
+                                        <Profile />
                                     </PrivateRoute>
                                 }
                             />

@@ -18,7 +18,29 @@ class UserViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get', 'patch'])
     def me(self, request):
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
+        try:
+            if request.method == 'GET':
+                serializer = self.get_serializer(request.user)
+                return Response(serializer.data)
+            elif request.method == 'PATCH':
+                serializer = self.get_serializer(request.user, data=request.data, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data)
+                return Response(
+                    {
+                        'detail': 'Données invalides',
+                        'errors': serializer.errors
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except Exception as e:
+            return Response(
+                {
+                    'detail': str(e),
+                    'message': 'Une erreur est survenue lors de la mise à jour du profil'
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

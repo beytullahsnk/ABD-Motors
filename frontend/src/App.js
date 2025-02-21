@@ -15,7 +15,6 @@ import LoadingScreen from './components/LoadingScreen';
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
 import VehicleList from './pages/VehicleList';
 import VehicleDetail from './pages/VehicleDetail';
 import FolderCreation from './pages/FolderCreation';
@@ -56,14 +55,6 @@ const App = () => {
                             <Route path="/register" element={<Register />} />
 
                             {/* Routes protégées */}
-                            <Route
-                                path="/dashboard"
-                                element={
-                                    <PrivateRoute>
-                                        <Dashboard />
-                                    </PrivateRoute>
-                                }
-                            />
                             <Route
                                 path="/vehicles"
                                 element={
@@ -106,7 +97,8 @@ const App = () => {
                             />
 
                             {/* Redirection par défaut */}
-                            <Route path="/" element={<Navigate to="/dashboard" />} />
+                            <Route path="/" element={<Navigate to="/vehicles" />} />
+                            <Route path="*" element={<Navigate to="/vehicles" />} />
                         </Routes>
                     </Router>
                 </AuthProvider>

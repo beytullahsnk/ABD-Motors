@@ -12,6 +12,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import LogoutIcon from '@mui/icons-material/Logout';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -25,88 +27,162 @@ const Navbar = () => {
     if (!user) return null;
 
     return (
-        <AppBar position="sticky" elevation={0}>
+        <AppBar 
+            position="sticky" 
+            sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.4)',
+                height: 90,
+                display: 'flex',
+                justifyContent: 'center'
+            }}
+        >
             <Container maxWidth="lg">
-                <Toolbar disableGutters sx={{ height: 70 }}>
+                <Toolbar 
+                    disableGutters 
+                    sx={{ 
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: 3
+                    }}
+                >
                     <Box 
                         sx={{ 
                             display: 'flex', 
                             alignItems: 'center', 
                             cursor: 'pointer',
-                            '&:hover': { opacity: 0.8 }
+                            transition: 'all 0.3s ease-in-out',
+                            padding: '8px 16px',
+                            borderRadius: '16px',
+                            '&:hover': { 
+                                transform: 'scale(1.02)',
+                                backgroundColor: 'rgba(44, 62, 80, 0.04)'
+                            }
                         }}
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate('/vehicles')}
                     >
-                        <DirectionsCarIcon sx={{ fontSize: 32, mr: 1, color: 'primary.main' }} />
+                        <Box
+                            sx={{
+                                backgroundColor: 'primary.main',
+                                borderRadius: '16px',
+                                padding: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginRight: '16px',
+                                boxShadow: '0 4px 12px rgba(44, 62, 80, 0.2)',
+                                transition: 'all 0.3s ease-in-out',
+                                '&:hover': {
+                                    transform: 'rotate(8deg) scale(1.1)',
+                                    boxShadow: '0 6px 16px rgba(44, 62, 80, 0.25)'
+                                }
+                            }}
+                        >
+                            <DirectionsCarIcon 
+                                sx={{ 
+                                    fontSize: 38,
+                                    color: 'white'
+                                }} 
+                            />
+                        </Box>
                         <Typography
-                            variant="h5"
+                            variant="h4"
                             component="div"
                             sx={{ 
-                                fontWeight: 600,
+                                fontWeight: 800,
                                 background: 'linear-gradient(45deg, #2C3E50 30%, #3498DB 90%)',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
+                                letterSpacing: '1px',
+                                textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
+                                position: 'relative',
+                                '&::after': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    bottom: -4,
+                                    left: 0,
+                                    width: '0%',
+                                    height: '3px',
+                                    background: 'linear-gradient(45deg, #2C3E50 30%, #3498DB 90%)',
+                                    transition: 'width 0.3s ease-in-out',
+                                    borderRadius: '2px'
+                                },
+                                '&:hover::after': {
+                                    width: '100%'
+                                }
                             }}
                         >
                             ABD Motors
                         </Typography>
                     </Box>
 
-                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', gap: 4 }}>
-                        <Button 
-                            color="primary"
-                            onClick={() => navigate('/dashboard')}
-                            sx={{ 
-                                fontWeight: 500,
-                                '&:hover': { backgroundColor: 'rgba(44, 62, 80, 0.04)' }
+                    <Box 
+                        sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 3,
+                            '& > *': {
+                                transition: 'all 0.3s ease-in-out'
+                            }
+                        }}
+                    >
+                        <IconButton
+                            onClick={() => navigate('/profile')}
+                            sx={{
+                                p: 0.5,
+                                borderRadius: '50%',
+                                '&:hover': {
+                                    backgroundColor: 'transparent',
+                                    '& .MuiAvatar-root': {
+                                        transform: 'translateY(-2px) scale(1.05)',
+                                        boxShadow: '0 6px 16px rgba(44, 62, 80, 0.25)',
+                                        bgcolor: 'primary.dark',
+                                    }
+                                }
                             }}
                         >
-                            Tableau de bord
-                        </Button>
-                        <Button 
-                            color="primary"
-                            onClick={() => navigate('/vehicles')}
-                            sx={{ 
-                                fontWeight: 500,
-                                '&:hover': { backgroundColor: 'rgba(44, 62, 80, 0.04)' }
-                            }}
-                        >
-                            Véhicules
-                        </Button>
-                    </Box>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Avatar 
                                 sx={{ 
+                                    width: 48,
+                                    height: 48,
                                     bgcolor: 'primary.main',
-                                    width: 40,
-                                    height: 40,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                        opacity: 0.8
-                                    }
+                                    fontWeight: 700,
+                                    fontSize: '1.2rem',
+                                    border: '2px solid white',
+                                    boxShadow: '0 4px 12px rgba(44, 62, 80, 0.2)',
+                                    transition: 'all 0.3s ease-in-out',
                                 }}
-                                onClick={() => navigate('/profile')}
                             >
                                 {user.first_name?.[0]?.toUpperCase()}
                             </Avatar>
-                            <Button 
-                                variant="outlined"
-                                color="primary"
-                                onClick={handleLogout}
-                                sx={{ 
-                                    borderRadius: 20,
-                                    px: 3,
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(44, 62, 80, 0.04)',
-                                    }
-                                }}
-                            >
-                                Déconnexion
-                            </Button>
-                        </Box>
+                        </IconButton>
+                        <Button 
+                            variant="contained"
+                            color="primary"
+                            onClick={handleLogout}
+                            startIcon={<LogoutIcon />}
+                            sx={{ 
+                                borderRadius: '16px',
+                                px: 4,
+                                py: 1.5,
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                fontSize: '1rem',
+                                boxShadow: '0 4px 12px rgba(44, 62, 80, 0.2)',
+                                background: 'linear-gradient(45deg, #2C3E50 30%, #3498DB 90%)',
+                                transition: 'all 0.3s ease-in-out',
+                                '&:hover': {
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 6px 16px rgba(44, 62, 80, 0.25)',
+                                }
+                            }}
+                        >
+                            Déconnexion
+                        </Button>
                     </Box>
                 </Toolbar>
             </Container>

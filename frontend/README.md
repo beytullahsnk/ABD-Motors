@@ -1,70 +1,185 @@
-# Getting Started with Create React App
+# 🌐 ABD-Motors Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Interface utilisateur React moderne pour la gestion de véhicules et de dossiers de location/vente.
 
-## Available Scripts
+## 🛠️ Technologies
 
-In the project directory, you can run:
+- React 18
+- Material-UI (MUI) v5
+- React Router v6
+- Axios pour les requêtes HTTP
+- JWT pour l'authentification
+- Date-fns pour la gestion des dates
+- React Context pour la gestion d'état
 
-### `npm start`
+## 📋 Prérequis
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Node.js (v16 ou supérieur)
+- npm ou yarn
+- Backend ABD-Motors en cours d'exécution
+- Navigateur moderne (Chrome, Firefox, Safari, Edge)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## ⚙️ Installation
 
-### `npm test`
+1. **Clonez le repository** :
+```bash
+git clone https://github.com/beytullahsnk/ABD-Motors.git
+cd ABD-Motors/frontend
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. **Installez les dépendances** :
+```bash
+npm install
+# ou
+yarn install
+```
 
-### `npm run build`
+3. **Configurez les variables d'environnement** :
+Créez un fichier `.env` à la racine du dossier frontend :
+```env
+REACT_APP_API_URL=http://localhost:8000/api
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🚀 Développement
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. **Lancez le serveur de développement** :
+```bash
+npm start
+# ou
+yarn start
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. **Accédez à l'application** :
+Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur.
 
-### `npm run eject`
+## 📚 Structure du projet
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+frontend/
+├── public/           # Ressources statiques
+├── src/
+│   ├── components/  # Composants réutilisables
+│   ├── contexts/    # Contextes React (auth, etc.)
+│   ├── pages/       # Pages de l'application
+│   ├── services/    # Services API
+│   ├── utils/       # Utilitaires et helpers
+│   ├── App.js       # Composant principal
+│   └── index.js     # Point d'entrée
+└── package.json
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🎯 Composants principaux
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Pages
+- `Login` : Authentification utilisateur
+- `Register` : Inscription utilisateur
+- `VehicleList` : Liste des véhicules avec filtres
+- `VehicleDetail` : Détails d'un véhicule
+- `Profile` : Gestion du profil utilisateur
+- `FolderCreation` : Création de dossier
+- `PurchaseCreation` : Création de dossier d'achat
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Composants
+- `Navbar` : Navigation principale
+- `VehicleCard` : Carte de présentation véhicule
+- `ErrorAlert` : Affichage des erreurs
+- `LoadingScreen` : Écran de chargement
 
-## Learn More
+## 🎨 Styles et thème
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+L'application utilise Material-UI avec un thème personnalisé :
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```javascript
+const theme = {
+  palette: {
+    primary: {
+      main: '#2C3E50',
+      light: '#34495E',
+      dark: '#1A252F',
+    },
+    secondary: {
+      main: '#E74C3C',
+      light: '#FF6B6B',
+      dark: '#C0392B',
+    }
+  }
+}
+```
 
-### Code Splitting
+## 🔗 Services API
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### authService
+- `login(username, password)`
+- `register(userData)`
+- `logout()`
+- `getCurrentUser()`
 
-### Analyzing the Bundle Size
+### vehicleService
+- `getVehicles()`
+- `getVehicleById(id)`
+- `createVehicle(data)`
+- `updateVehicle(id, data)`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### folderService
+- `createFolder(data)`
+- `getUserFolders()`
+- `updateFolder(id, data)`
 
-### Making a Progressive Web App
+## 🧪 Tests
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```bash
+# Lancer tous les tests
+npm test
 
-### Advanced Configuration
+# Lancer les tests avec couverture
+npm test -- --coverage
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+# Lancer les tests en mode watch
+npm test -- --watch
+```
 
-### Deployment
+## 📦 Build de production
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```bash
+# Créer un build de production
+npm run build
+# ou
+yarn build
+```
 
-### `npm run build` fails to minify
+Les fichiers de build seront générés dans le dossier `build/`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 🔒 Sécurité
+
+- Utilisation de JWT pour l'authentification
+- Validation des données côté client
+- Protection des routes sensibles
+- Gestion sécurisée des tokens
+- Sanitization des entrées utilisateur
+
+## 📝 Conventions de code
+
+- Utilisez des composants fonctionnels et des hooks
+- Suivez les principes de composition React
+- Documentez les props avec PropTypes
+- Utilisez des noms explicites pour les composants
+- Respectez l'architecture des dossiers
+
+## 🐛 Débogage
+
+- Utilisez React Developer Tools
+- Consultez la console du navigateur
+- Vérifiez les logs des requêtes API
+- Utilisez les outils de débogage de l'IDE
+
+## 🤝 Contribution
+
+1. Fork le projet
+2. Créez une branche pour votre fonctionnalité
+3. Committez vos changements
+4. Poussez vers la branche
+5. Ouvrez une Pull Request
+
+## 📜 Licence
+
+Ce projet est sous licence MIT.

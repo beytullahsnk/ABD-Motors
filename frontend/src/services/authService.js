@@ -67,14 +67,56 @@ const authService = {
                 role: 'CLIENT'
             };
 
+            console.log('Attempting registration with data:', {
+                ...data,
+                password: '[HIDDEN]'
+            });
+
             const response = await api.post('/auth/users/', data);
-            console.log('Register success:', response.data);
+            console.log('Registration API response:', response.data);
+
+            if (!response.data) {
+                throw new Error('No response data from registration');
+            }
 
             // Connecter automatiquement après l'inscription
+            console.log('Attempting automatic login after registration');
             return await authService.login(userData.username, userData.password);
         } catch (error) {
-            console.error('Register error:', error.response?.data);
-            throw error;
+            console.error('Registration error details:', {
+                message: error.message,
+                response: {
+                    status: error.response?.status,
+                    data: error.response?.data,
+                    headers: error.response?.headers
+                },
+                request: {
+                    url: error.config?.url,
+                    method: error.config?.method,
+                    data: error.config?.data ? {
+                        ...error.config.data,
+                        password: '[HIDDEN]'
+                    } : null
+                }
+            });
+            
+            // Construire un message d'erreur plus descriptif
+            let errorMessage = 'Erreur lors de l\'inscription: ';
+            if (error.response?.data) {
+                if (typeof error.response.data === 'object') {
+                    // Si l'erreur contient des champs spécifiques
+                    const fieldErrors = Object.entries(error.response.data)
+                        .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors[0] : errors}`)
+                        .join(', ');
+                    errorMessage += fieldErrors;
+                } else {
+                    errorMessage += error.response.data;
+                }
+            } else {
+                errorMessage += error.message || 'Une erreur inconnue est survenue';
+            }
+            
+            throw new Error(errorMessage);
         }
     },
 

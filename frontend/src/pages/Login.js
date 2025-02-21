@@ -55,7 +55,7 @@ const Login = () => {
                         required
                         fullWidth
                         id="login"
-                        label="Email ou nom d'utilisateur"
+                        label="Nom d'utilisateur"
                         name="login"
                         autoComplete="email username"
                         autoFocus

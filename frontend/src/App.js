@@ -19,6 +19,7 @@ import Dashboard from './pages/Dashboard';
 import VehicleList from './pages/VehicleList';
 import VehicleDetail from './pages/VehicleDetail';
 import FolderCreation from './pages/FolderCreation';
+import PurchaseCreation from './pages/PurchaseCreation';
 
 // Theme
 import theme from './theme';
@@ -83,6 +84,14 @@ const App = () => {
                                 element={
                                     <PrivateRoute>
                                         <FolderCreation />
+                                    </PrivateRoute>
+                                }
+                            />
+                            <Route
+                                path="/vehicles/:id/purchase"
+                                element={
+                                    <PrivateRoute>
+                                        <PurchaseCreation />
                                     </PrivateRoute>
                                 }
                             />

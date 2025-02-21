@@ -131,8 +131,15 @@ const VehicleCard = ({ vehicle }) => {
                 <Stack direction="row" spacing={1} mb={2}>
                     <Chip 
                         label={vehicle.type_offer === 'RENTAL' ? 'À louer' : 'À vendre'} 
+                        sx={{ 
+                            bgcolor: vehicle.type_offer === 'RENTAL' ? 'primary.main' : 'secondary.main',
+                            color: 'white',
+                            fontWeight: 500,
+                            '&:hover': {
+                                bgcolor: vehicle.type_offer === 'RENTAL' ? 'primary.dark' : 'secondary.dark'
+                            }
+                        }}
                         size="small" 
-                        color={vehicle.type_offer === 'RENTAL' ? 'primary' : 'secondary'}
                     />
                     {vehicle.has_insurance && (
                         <Chip label="Assuré" size="small" color="success" />

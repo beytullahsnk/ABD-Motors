@@ -16,6 +16,7 @@ import { isValidEmail, isValidPhone, isStrongPassword } from '../utils/validator
 const Register = () => {
     const [formData, setFormData] = useState({
         email: '',
+        username: '',
         password: '',
         confirmPassword: '',
         firstName: '',
@@ -42,7 +43,22 @@ const Register = () => {
             return;
         }
 
-        if (!isValidPhone(formData.phone)) {
+        if (!formData.username.trim()) {
+            setError('Le nom d\'utilisateur est requis');
+            return;
+        }
+
+        if (!formData.firstName.trim()) {
+            setError('Le prénom est requis');
+            return;
+        }
+
+        if (!formData.lastName.trim()) {
+            setError('Le nom est requis');
+            return;
+        }
+
+        if (formData.phone && !isValidPhone(formData.phone)) {
             setError('Format de numéro de téléphone invalide');
             return;
         }
@@ -105,6 +121,17 @@ const Register = () => {
                             <TextField
                                 required
                                 fullWidth
+                                name="username"
+                                label="Nom d'utilisateur"
+                                value={formData.username}
+                                onChange={handleChange}
+                                helperText="Ce nom d'utilisateur sera utilisé pour vous connecter"
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                required
+                                fullWidth
                                 name="email"
                                 label="Adresse email"
                                 type="email"
@@ -114,10 +141,9 @@ const Register = () => {
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
-                                required
                                 fullWidth
                                 name="phone"
-                                label="Téléphone"
+                                label="Téléphone (facultatif)"
                                 value={formData.phone}
                                 onChange={handleChange}
                             />
@@ -131,6 +157,7 @@ const Register = () => {
                                 type="password"
                                 value={formData.password}
                                 onChange={handleChange}
+                                helperText="8 caractères minimum"
                             />
                         </Grid>
                         <Grid item xs={12}>

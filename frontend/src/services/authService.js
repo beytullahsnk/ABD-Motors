@@ -1,14 +1,14 @@
 import api from './api';
 
 const authService = {
-    login: async (email, password) => {
+    login: async (username, password) => {
         try {
             // Debug
-            console.log('Attempting login with:', { email });
+            console.log('Attempting login with:', { username });
 
             // Obtention du token
             const { data: tokenData } = await api.post('/auth/token/', {
-                username: email,
+                username: username,
                 password: password
             });
 
@@ -57,9 +57,8 @@ const authService = {
 
     register: async (userData) => {
         try {
-            // S'assurer que le username est l'email
             const data = {
-                username: userData.email,
+                username: userData.username,
                 email: userData.email,
                 password: userData.password,
                 first_name: userData.firstName,
@@ -72,7 +71,7 @@ const authService = {
             console.log('Register success:', response.data);
 
             // Connecter automatiquement après l'inscription
-            return await authService.login(userData.email, userData.password);
+            return await authService.login(userData.username, userData.password);
         } catch (error) {
             console.error('Register error:', error.response?.data);
             throw error;

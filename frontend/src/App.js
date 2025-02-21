@@ -15,10 +15,11 @@ import LoadingScreen from './components/LoadingScreen';
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
 import VehicleList from './pages/VehicleList';
 import VehicleDetail from './pages/VehicleDetail';
 import FolderCreation from './pages/FolderCreation';
+import PurchaseCreation from './pages/PurchaseCreation';
+import Profile from './pages/Profile';
 
 // Theme
 import theme from './theme';
@@ -55,14 +56,6 @@ const App = () => {
 
                             {/* Routes protégées */}
                             <Route
-                                path="/dashboard"
-                                element={
-                                    <PrivateRoute>
-                                        <Dashboard />
-                                    </PrivateRoute>
-                                }
-                            />
-                            <Route
                                 path="/vehicles"
                                 element={
                                     <PrivateRoute>
@@ -86,9 +79,26 @@ const App = () => {
                                     </PrivateRoute>
                                 }
                             />
+                            <Route
+                                path="/vehicles/:id/purchase"
+                                element={
+                                    <PrivateRoute>
+                                        <PurchaseCreation />
+                                    </PrivateRoute>
+                                }
+                            />
+                            <Route
+                                path="/profile"
+                                element={
+                                    <PrivateRoute>
+                                        <Profile />
+                                    </PrivateRoute>
+                                }
+                            />
 
                             {/* Redirection par défaut */}
-                            <Route path="/" element={<Navigate to="/dashboard" />} />
+                            <Route path="/" element={<Navigate to="/vehicles" />} />
+                            <Route path="*" element={<Navigate to="/vehicles" />} />
                         </Routes>
                     </Router>
                 </AuthProvider>

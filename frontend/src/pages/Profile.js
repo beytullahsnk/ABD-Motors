@@ -63,7 +63,7 @@ const getFolderStatusColor = (status) => {
     switch (status) {
         case 'PENDING':
             return 'warning';
-        case 'APPROVED':
+        case 'VALIDATED':
             return 'success';
         case 'REJECTED':
             return 'error';
@@ -76,14 +76,21 @@ const getFolderStatusLabel = (status) => {
     switch (status) {
         case 'PENDING':
             return 'En attente';
-        case 'APPROVED':
-            return 'Approuvé';
+        case 'VALIDATED':
+            return 'Validé';
         case 'REJECTED':
             return 'Refusé';
         default:
             return status;
     }
 };
+
+// Constantes pour les états des dossiers
+const FOLDER_TABS = [
+    { value: 'PENDING', label: 'En attente', color: 'warning' },
+    { value: 'VALIDATED', label: 'Validés', color: 'success' },
+    { value: 'REJECTED', label: 'Refusés', color: 'error' }
+];
 
 const Profile = () => {
     const { user, setUser } = useAuth();
@@ -120,15 +127,10 @@ const Profile = () => {
         setTabValue(newValue);
     };
 
-    // Filtrage des dossiers de location
-    const rentalFolders = folders.filter(folder => 
-        folder.type_folder === 'RENTAL'
-    );
-
-    // Filtrage des dossiers d'achat
-    const purchaseFolders = folders.filter(folder => 
-        folder.type_folder === 'PURCHASE'
-    );
+    // Filtrage des dossiers par état
+    const getFoldersByStatus = (status) => {
+        return folders.filter(folder => folder.status === status);
+    };
 
     const handleEdit = () => {
         setIsEditing(true);
@@ -439,36 +441,23 @@ const Profile = () => {
 
             {/* Statistiques */}
             <Grid container spacing={3} sx={{ mb: 3 }}>
-                <Grid item xs={12} sm={6}>
-                    <Card sx={{ height: '100%' }}>
-                        <CardContent>
-                            <Stack direction="row" spacing={2} alignItems="center">
-                                <Avatar sx={{ bgcolor: 'success.light' }}>
-                                    <FolderIcon />
-                                </Avatar>
-                                <Box>
-                                    <Typography variant="h6">{rentalFolders.length}</Typography>
-                                    <Typography color="text.secondary">Dossiers de location</Typography>
-                                </Box>
-                            </Stack>
-                        </CardContent>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <Card sx={{ height: '100%' }}>
-                        <CardContent>
-                            <Stack direction="row" spacing={2} alignItems="center">
-                                <Avatar sx={{ bgcolor: 'warning.light' }}>
-                                    <FolderIcon />
-                                </Avatar>
-                                <Box>
-                                    <Typography variant="h6">{purchaseFolders.length}</Typography>
-                                    <Typography color="text.secondary">Dossiers d'achat</Typography>
-                                </Box>
-                            </Stack>
-                        </CardContent>
-                    </Card>
-                </Grid>
+                {FOLDER_TABS.map((tab) => (
+                    <Grid item xs={12} sm={4} key={tab.value}>
+                        <Card sx={{ height: '100%' }}>
+                            <CardContent>
+                                <Stack direction="row" spacing={2} alignItems="center">
+                                    <Avatar sx={{ bgcolor: `${tab.color}.light` }}>
+                                        <FolderIcon />
+                                    </Avatar>
+                                    <Box>
+                                        <Typography variant="h6">{getFoldersByStatus(tab.value).length}</Typography>
+                                        <Typography color="text.secondary">Dossiers {tab.label.toLowerCase()}</Typography>
+                                    </Box>
+                                </Stack>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                ))}
             </Grid>
 
             {/* Onglets et tableaux */}
@@ -476,145 +465,182 @@ const Profile = () => {
                 <Tabs
                     value={tabValue}
                     onChange={handleTabChange}
-                    sx={{
-                        borderBottom: 1,
-                        borderColor: 'divider',
-                        bgcolor: 'background.paper',
-                        px: 2,
-                        '& .MuiTab-root': {
-                            minHeight: 64,
-                            fontSize: '0.875rem'
-                        }
-                    }}
+                    sx={{ borderBottom: 1, borderColor: 'divider' }}
                 >
                     <Tab 
-                        label={`Locations (${rentalFolders.length})`}
-                        icon={<DirectionsCarIcon />}
+                        label={`En attente (${getFoldersByStatus('PENDING').length})`}
+                        icon={<FolderIcon />}
                         iconPosition="start"
                     />
                     <Tab 
-                        label={`Achats (${purchaseFolders.length})`}
+                        label={`Validés (${getFoldersByStatus('VALIDATED').length})`}
+                        icon={<FolderIcon />}
+                        iconPosition="start"
+                    />
+                    <Tab 
+                        label={`Refusés (${getFoldersByStatus('REJECTED').length})`}
                         icon={<FolderIcon />}
                         iconPosition="start"
                     />
                 </Tabs>
 
                 <TabPanel value={tabValue} index={0}>
-                    {rentalFolders.length === 0 ? (
-                        <Box sx={{ p: 4, textAlign: 'center' }}>
-                            <FolderIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
-                            <Typography color="text.secondary">
-                                Vous n'avez pas encore de dossier de location
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <TableContainer>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Véhicule</TableCell>
-                                        <TableCell>Statut</TableCell>
-                                        <TableCell>Date de création</TableCell>
-                                        <TableCell align="right">Actions</TableCell>
+                    <TableContainer>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Véhicule</TableCell>
+                                    <TableCell>Type</TableCell>
+                                    <TableCell>Date de création</TableCell>
+                                    <TableCell align="right">Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {getFoldersByStatus('PENDING').map((folder) => (
+                                    <TableRow key={folder.id} hover>
+                                        <TableCell>
+                                            <Typography variant="subtitle2">
+                                                {folder.vehicle.brand} {folder.vehicle.model}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                {folder.vehicle.year}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={folder.type_folder === 'RENTAL' ? 'Location' : 'Achat'}
+                                                sx={{ 
+                                                    bgcolor: folder.type_folder === 'RENTAL' ? 'primary.main' : 'secondary.main',
+                                                    color: 'white',
+                                                    fontWeight: 500
+                                                }}
+                                                size="small"
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(folder.creation_date).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => navigate(`/vehicles/${folder.vehicle.id}`)}
+                                                startIcon={<DirectionsCarIcon />}
+                                            >
+                                                Voir le véhicule
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {rentalFolders.map((folder) => (
-                                        <TableRow key={folder.id} hover>
-                                            <TableCell>
-                                                <Typography variant="subtitle2">
-                                                    {folder.vehicle.brand} {folder.vehicle.model}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    {folder.vehicle.year}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    label={getFolderStatusLabel(folder.status)}
-                                                    color={getFolderStatusColor(folder.status)}
-                                                    size="small"
-                                                    sx={{ minWidth: 100 }}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                {new Date(folder.creation_date).toLocaleDateString()}
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Button
-                                                    size="small"
-                                                    variant="outlined"
-                                                    onClick={() => navigate(`/vehicles/${folder.vehicle.id}`)}
-                                                    startIcon={<DirectionsCarIcon />}
-                                                >
-                                                    Voir le véhicule
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    )}
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </TabPanel>
 
                 <TabPanel value={tabValue} index={1}>
-                    {purchaseFolders.length === 0 ? (
-                        <Box sx={{ p: 4, textAlign: 'center' }}>
-                            <FolderIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
-                            <Typography color="text.secondary">
-                                Vous n'avez pas encore de dossier d'achat
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <TableContainer>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Véhicule</TableCell>
-                                        <TableCell>Statut</TableCell>
-                                        <TableCell>Date de création</TableCell>
-                                        <TableCell align="right">Actions</TableCell>
+                    <TableContainer>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Véhicule</TableCell>
+                                    <TableCell>Type</TableCell>
+                                    <TableCell>Date de création</TableCell>
+                                    <TableCell align="right">Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {getFoldersByStatus('VALIDATED').map((folder) => (
+                                    <TableRow key={folder.id} hover>
+                                        <TableCell>
+                                            <Typography variant="subtitle2">
+                                                {folder.vehicle.brand} {folder.vehicle.model}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                {folder.vehicle.year}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={folder.type_folder === 'RENTAL' ? 'Location' : 'Achat'}
+                                                sx={{ 
+                                                    bgcolor: folder.type_folder === 'RENTAL' ? 'primary.main' : 'secondary.main',
+                                                    color: 'white',
+                                                    fontWeight: 500
+                                                }}
+                                                size="small"
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(folder.creation_date).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => navigate(`/vehicles/${folder.vehicle.id}`)}
+                                                startIcon={<DirectionsCarIcon />}
+                                            >
+                                                Voir le véhicule
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {purchaseFolders.map((folder) => (
-                                        <TableRow key={folder.id} hover>
-                                            <TableCell>
-                                                <Typography variant="subtitle2">
-                                                    {folder.vehicle.brand} {folder.vehicle.model}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    {folder.vehicle.year}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    label={getFolderStatusLabel(folder.status)}
-                                                    color={getFolderStatusColor(folder.status)}
-                                                    size="small"
-                                                    sx={{ minWidth: 100 }}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                {new Date(folder.creation_date).toLocaleDateString()}
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Button
-                                                    size="small"
-                                                    variant="outlined"
-                                                    onClick={() => navigate(`/vehicles/${folder.vehicle.id}`)}
-                                                    startIcon={<DirectionsCarIcon />}
-                                                >
-                                                    Voir le véhicule
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    )}
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={2}>
+                    <TableContainer>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Véhicule</TableCell>
+                                    <TableCell>Type</TableCell>
+                                    <TableCell>Date de création</TableCell>
+                                    <TableCell align="right">Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {getFoldersByStatus('REJECTED').map((folder) => (
+                                    <TableRow key={folder.id} hover>
+                                        <TableCell>
+                                            <Typography variant="subtitle2">
+                                                {folder.vehicle.brand} {folder.vehicle.model}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                {folder.vehicle.year}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={folder.type_folder === 'RENTAL' ? 'Location' : 'Achat'}
+                                                sx={{ 
+                                                    bgcolor: folder.type_folder === 'RENTAL' ? 'primary.main' : 'secondary.main',
+                                                    color: 'white',
+                                                    fontWeight: 500
+                                                }}
+                                                size="small"
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(folder.creation_date).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => navigate(`/vehicles/${folder.vehicle.id}`)}
+                                                startIcon={<DirectionsCarIcon />}
+                                            >
+                                                Voir le véhicule
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </TabPanel>
             </Card>
         </Container>

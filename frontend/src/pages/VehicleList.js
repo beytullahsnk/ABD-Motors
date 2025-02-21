@@ -26,6 +26,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import TuneIcon from '@mui/icons-material/Tune';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import SortIcon from '@mui/icons-material/Sort';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 
 const VehicleList = () => {
     const theme = useTheme();
@@ -35,6 +36,7 @@ const VehicleList = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState('ALL');
     const [sortBy, setSortBy] = useState('date');
+    const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
 
     useEffect(() => {
         const fetchVehicles = async () => {
@@ -56,7 +58,8 @@ const VehicleList = () => {
             const matchesSearch = vehicle.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 vehicle.model.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesType = typeFilter === 'ALL' || vehicle.type_offer === typeFilter;
-            return matchesSearch && matchesType;
+            const matchesAvailability = !showOnlyAvailable || vehicle.state === 'AVAILABLE';
+            return matchesSearch && matchesType && matchesAvailability;
         })
         .sort((a, b) => {
             switch (sortBy) {
@@ -72,6 +75,13 @@ const VehicleList = () => {
                     return 0;
             }
         });
+
+    const handleResetFilters = () => {
+        setSearchTerm('');
+        setTypeFilter('ALL');
+        setSortBy('date');
+        setShowOnlyAvailable(false);
+    };
 
     if (loading) {
         return <LoadingScreen message="Chargement des véhicules..." />;
@@ -140,7 +150,7 @@ const VehicleList = () => {
                 {/* Filtres et recherche */}
                 <Card sx={{ mb: 4, p: 2 }}>
                     <Grid container spacing={3} alignItems="center">
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={2.4}>
                             <TextField
                                 fullWidth
                                 placeholder="Rechercher un véhicule..."
@@ -155,7 +165,7 @@ const VehicleList = () => {
                                 }}
                             />
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={2.4}>
                             <FormControl fullWidth>
                                 <Select
                                     value={typeFilter}
@@ -173,7 +183,24 @@ const VehicleList = () => {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={2.4}>
+                            <FormControl fullWidth>
+                                <Select
+                                    value={showOnlyAvailable}
+                                    onChange={(e) => setShowOnlyAvailable(e.target.value)}
+                                    displayEmpty
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <DirectionsCarIcon />
+                                        </InputAdornment>
+                                    }
+                                >
+                                    <MenuItem value={false}>Tous les états</MenuItem>
+                                    <MenuItem value={true}>Disponibles uniquement</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={2.4}>
                             <FormControl fullWidth>
                                 <Select
                                     value={sortBy}
@@ -190,6 +217,28 @@ const VehicleList = () => {
                                     <MenuItem value="price_desc">Prix décroissant</MenuItem>
                                 </Select>
                             </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={2.4} sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <IconButton
+                                onClick={handleResetFilters}
+                                sx={{
+                                    bgcolor: 'background.paper',
+                                    border: '1px solid',
+                                    borderColor: 'divider',
+                                    width: 56,
+                                    height: 56,
+                                    '&:hover': {
+                                        bgcolor: 'action.hover',
+                                    }
+                                }}
+                                title="Réinitialiser les filtres"
+                            >
+                                <RestartAltIcon />
+                            </IconButton>
                         </Grid>
                     </Grid>
                 </Card>

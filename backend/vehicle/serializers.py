@@ -1,36 +1,31 @@
 from rest_framework import serializers
 from .models import Vehicle
+from django.conf import settings
 
 class VehicleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Vehicle
-        fields = [
-            'id', 'brand', 'model', 'year', 'mileage', 'daily_rate',
-            'fuel_type', 'transmission', 'seats', 'description', 'image',
-            'is_available', 'has_insurance', 'has_technical_control',
-            'has_maintenance', 'has_assistance', 'rental_start_date',
-            'rental_end_date', 'created_at', 'updated_at'
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-class VehicleDetailSerializer(serializers.ModelSerializer):
-    owner_name = serializers.SerializerMethodField()
-    renter_name = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Vehicle
-        fields = [
-            'id', 'brand', 'model', 'year', 'mileage', 'daily_rate',
-            'fuel_type', 'transmission', 'seats', 'description', 'image',
-            'is_available', 'has_insurance', 'has_technical_control',
-            'has_maintenance', 'has_assistance', 'owner', 'owner_name',
-            'renter', 'renter_name', 'rental_start_date', 'rental_end_date',
-            'created_at', 'updated_at'
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = ['id', 'brand', 'model', 'year', 'mileage', 'sale_price', 
+                 'rental_price', 'type_offer', 'state', 'description', 'image', 
+                 'image_url', 'has_insurance', 'has_maintenance', 'date_added']
+        read_only_fields = ('owner', 'renter')
 
-    def get_owner_name(self, obj):
-        return f"{obj.owner.first_name} {obj.owner.last_name}" if obj.owner else None
-
-    def get_renter_name(self, obj):
-        return f"{obj.renter.first_name} {obj.renter.last_name}" if obj.renter else None 
+    def get_image_url(self, obj):
+        if obj.image:
+            # Récupérer le nom du fichier sans le chemin
+            image_name = obj.image.name
+            if '/' in image_name:
+                image_name = image_name.split('/')[-1]
+            
+            # Construire l'URL S3 complète
+            s3_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/media/vehicles/{image_name}"
+            
+            # Log pour déboguer
+            print("Image details:")
+            print(f"Original name: {obj.image.name}")
+            print(f"S3 URL: {s3_url}")
+            
+            return s3_url
+        return None 

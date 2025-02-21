@@ -10,7 +10,8 @@ from rest_framework.response import Response
 from user.permissions import IsGestionnaireOrAdmin
 from user.models import User
 from django.db import models
-from django.utils import timezone
+from django.conf import settings
+import boto3
 
 # Create your views here.
 
@@ -104,57 +105,41 @@ class VehicleViewSet(viewsets.ModelViewSet):
         vehicle.save()
         return Response(self.get_serializer(vehicle).data)
 
-    @action(detail=False, methods=['get'])
-    def available(self, request):
-        """Liste tous les véhicules disponibles à la location"""
-        current_date = timezone.now().date()
-        vehicles = self.queryset.filter(
-            is_available=True
-        ).exclude(
-            rental_start_date__lte=current_date,
-            rental_end_date__gte=current_date
-        )
-        serializer = self.get_serializer(vehicles, many=True)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=['post'])
-    def reserve(self, request, pk=None):
-        """Réserve un véhicule pour les dates spécifiées"""
+    @action(detail=True, methods=['get'])
+    def check_image(self, request, pk=None):
         vehicle = self.get_object()
-        start_date = request.data.get('start_date')
-        end_date = request.data.get('end_date')
+        if not vehicle.image:
+            return Response({
+                'status': 'error',
+                'message': 'Pas d\'image pour ce véhicule'
+            })
 
-        if not start_date or not end_date:
-            return Response(
-                {'error': 'Les dates de début et de fin sont requises'},
-                status=status.HTTP_400_BAD_REQUEST
+        # Vérifier si l'image existe dans S3
+        if settings.USE_S3:
+            s3 = boto3.client('s3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
             )
+            try:
+                # Construire le chemin S3
+                s3_path = f"media/vehicles/{vehicle.image.name.split('/')[-1]}"
+                s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_path)
+                exists_in_s3 = True
+            except:
+                exists_in_s3 = False
 
-        if not vehicle.is_available:
-            return Response(
-                {'error': 'Ce véhicule n\'est pas disponible'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Vérifier si les dates sont disponibles
-        conflicting_reservations = Vehicle.objects.filter(
-            id=vehicle.id,
-            rental_start_date__lte=end_date,
-            rental_end_date__gte=start_date
-        ).exists()
-
-        if conflicting_reservations:
-            return Response(
-                {'error': 'Le véhicule n\'est pas disponible pour ces dates'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Mettre à jour le véhicule
-        vehicle.renter = request.user
-        vehicle.rental_start_date = start_date
-        vehicle.rental_end_date = end_date
-        vehicle.is_available = False
-        vehicle.save()
-
-        serializer = VehicleDetailSerializer(vehicle)
-        return Response(serializer.data)
+            return Response({
+                'status': 'success',
+                'image_name': vehicle.image.name,
+                'image_url': vehicle.image.url,
+                'exists_in_s3': exists_in_s3,
+                's3_path': s3_path if exists_in_s3 else None
+            })
+        
+        return Response({
+            'status': 'success',
+            'image_name': vehicle.image.name,
+            'image_url': vehicle.image.url,
+            'storage': 'local'
+        })

@@ -8,8 +8,9 @@ import {
     Button,
     Typography,
     Link,
-    Alert
 } from '@mui/material';
+import ErrorAlert from '../components/ErrorAlert';
+import { isValidEmail } from '../utils/validators';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -20,11 +21,23 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(''); // Réinitialiser l'erreur
+
+        if (!isValidEmail(email)) {
+            setError('Format d\'email invalide');
+            return;
+        }
+
         try {
             await login(email, password);
             navigate('/dashboard');
         } catch (error) {
-            setError('Email ou mot de passe incorrect');
+            console.error('Login error:', error.response?.data);
+            if (error.response?.status === 401) {
+                setError('Email ou mot de passe incorrect');
+            } else {
+                setError(error.response?.data?.detail || 'Une erreur est survenue');
+            }
         }
     };
 
@@ -41,7 +54,7 @@ const Login = () => {
                 <Typography component="h1" variant="h5">
                     Connexion
                 </Typography>
-                {error && <Alert severity="error">{error}</Alert>}
+                <ErrorAlert error={error} />
                 <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
                     <TextField
                         margin="normal"
@@ -84,4 +97,4 @@ const Login = () => {
     );
 };
 
-export default Login; 
+export default Login;

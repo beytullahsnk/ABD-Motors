@@ -1,5 +1,9 @@
 from django.db import models
-from django.conf import settings
+from user.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Models vehicle.
 
@@ -18,14 +22,22 @@ class Vehicle(models.Model):
 
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
-    year = models.IntegerField()
-    mileage = models.IntegerField()
-    daily_rate = models.DecimalField(max_digits=10, decimal_places=2)
-    fuel_type = models.CharField(max_length=20, choices=FUEL_TYPES)
-    transmission = models.CharField(max_length=20, choices=TRANSMISSION_TYPES)
-    seats = models.IntegerField()
-    description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='vehicles/', blank=True, null=True)
+    year = models.IntegerField(
+        validators=[
+            MinValueValidator(1900),
+            MaxValueValidator(2100)
+        ]
+    )
+    mileage = models.IntegerField(
+        validators=[MinValueValidator(0)]
+    )
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    rental_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    type_offer = models.CharField(max_length=20, choices=TYPES)
+    state = models.CharField(max_length=20, choices=STATES)
+    description = models.TextField()
+    image = models.ImageField(upload_to='vehicles/', null=True, blank=True)
+    date_added = models.DateTimeField(auto_now_add=True)
     
     # Statut et vérifications
     is_available = models.BooleanField(default=True)
@@ -58,16 +70,15 @@ class Vehicle(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.brand} {self.model} ({self.year})"
+        return f"{self.brand} {self.model} ({self.type_offer})"
 
-    def update_availability(self):
-        """Met à jour la disponibilité du véhicule en fonction des dates de location"""
-        from django.utils import timezone
-        current_date = timezone.now().date()
+    def save(self, *args, **kwargs):
+        # Log avant la sauvegarde
+        if self.image:
+            logger.info(f"Saving vehicle {self.brand} {self.model} with image: {self.image.name}")
         
-        if self.rental_start_date and self.rental_end_date:
-            self.is_available = current_date < self.rental_start_date or current_date > self.rental_end_date
-        else:
-            self.is_available = True
+        super().save(*args, **kwargs)
         
-        self.save()
+        # Log après la sauvegarde
+        if self.image:
+            logger.info(f"Vehicle saved. Image URL: {self.image.url}")

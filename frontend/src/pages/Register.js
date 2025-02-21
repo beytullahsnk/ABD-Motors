@@ -8,10 +8,10 @@ import {
     Button,
     Typography,
     Link,
-    Alert,
     Grid,
-    CircularProgress
 } from '@mui/material';
+import ErrorAlert from '../components/ErrorAlert';
+import { isValidEmail, isValidPhone, isStrongPassword } from '../utils/validators';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -23,65 +23,45 @@ const Register = () => {
         phone: ''
     });
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
     const { register } = useAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value
+        setFormData(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
         }));
-        // Réinitialiser l'erreur lorsque l'utilisateur modifie un champ
-        setError('');
-    };
-
-    const validateForm = () => {
-        if (!formData.email || !formData.password || !formData.firstName || !formData.lastName || !formData.phone) {
-            setError('Veuillez remplir tous les champs obligatoires');
-            return false;
-        }
-        if (formData.password !== formData.confirmPassword) {
-            setError('Les mots de passe ne correspondent pas');
-            return false;
-        }
-        if (formData.password.length < 8) {
-            setError('Le mot de passe doit contenir au moins 8 caractères');
-            return false;
-        }
-        return true;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!validateForm()) {
+        // Validation des champs
+        if (!isValidEmail(formData.email)) {
+            setError('Format d\'email invalide');
             return;
         }
 
-        setLoading(true);
+        if (!isValidPhone(formData.phone)) {
+            setError('Format de numéro de téléphone invalide');
+            return;
+        }
+
+        if (!isStrongPassword(formData.password)) {
+            setError('Le mot de passe doit contenir au moins 8 caractères');
+            return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            setError('Les mots de passe ne correspondent pas');
+            return;
+        }
+
         try {
-            const { confirmPassword, ...registrationData } = formData;
-            await register(registrationData);
+            await register(formData);
             navigate('/login');
         } catch (error) {
-            console.error('Registration error:', error);
-            if (error.response?.data) {
-                // Gestion des erreurs spécifiques du backend
-                const backendError = error.response.data;
-                if (backendError.email) {
-                    setError("Cette adresse email est déjà utilisée");
-                } else if (backendError.detail) {
-                    setError(backendError.detail);
-                } else {
-                    setError("Une erreur est survenue lors de l'inscription");
-                }
-            } else {
-                setError("Une erreur est survenue lors de l'inscription");
-            }
-        } finally {
-            setLoading(false);
+            setError(error.response?.data?.detail || 'Erreur lors de l\'inscription');
         }
     };
 
@@ -98,11 +78,7 @@ const Register = () => {
                 <Typography component="h1" variant="h5">
                     Inscription
                 </Typography>
-                {error && (
-                    <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
-                        {error}
-                    </Alert>
-                )}
+                <ErrorAlert error={error} />
                 <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
@@ -113,7 +89,6 @@ const Register = () => {
                                 label="Prénom"
                                 value={formData.firstName}
                                 onChange={handleChange}
-                                error={!!error && !formData.firstName}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -124,7 +99,6 @@ const Register = () => {
                                 label="Nom"
                                 value={formData.lastName}
                                 onChange={handleChange}
-                                error={!!error && !formData.lastName}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -136,7 +110,6 @@ const Register = () => {
                                 type="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                error={!!error && !formData.email}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -147,7 +120,6 @@ const Register = () => {
                                 label="Téléphone"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                error={!!error && !formData.phone}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -159,8 +131,6 @@ const Register = () => {
                                 type="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                error={!!error && (!formData.password || formData.password.length < 8)}
-                                helperText="Le mot de passe doit contenir au moins 8 caractères"
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -172,7 +142,6 @@ const Register = () => {
                                 type="password"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                error={!!error && formData.password !== formData.confirmPassword}
                             />
                         </Grid>
                     </Grid>
@@ -181,12 +150,11 @@ const Register = () => {
                         fullWidth
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
-                        disabled={loading}
                     >
-                        {loading ? <CircularProgress size={24} /> : "S'inscrire"}
+                        S'inscrire
                     </Button>
                     <Link href="/login" variant="body2">
-                        {"Déjà un compte ? Se connecter"}
+                        Déjà un compte ? Se connecter
                     </Link>
                 </Box>
             </Box>
@@ -194,4 +162,4 @@ const Register = () => {
     );
 };
 
-export default Register; 
+export default Register;

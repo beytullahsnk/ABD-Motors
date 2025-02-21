@@ -7,18 +7,8 @@ from vehicle.models import Vehicle
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = [
-            'id', 'user', 'vehicle', 'document_type', 'file',
-            'uploaded_at', 'is_verified', 'verification_date',
-            'verification_notes'
-        ]
-        read_only_fields = ['id', 'uploaded_at', 'is_verified',
-                           'verification_date', 'verification_notes']
-
-    def create(self, validated_data):
-        # Assurez-vous que l'utilisateur actuel est celui qui télécharge le fichier
-        validated_data['user'] = self.context['request'].user
-        return super().create(validated_data)
+        fields = '__all__'
+        read_only_fields = ('folder',)
 
 class FolderSerializer(serializers.ModelSerializer):
     client = UserSerializer(read_only=True)
@@ -32,6 +22,5 @@ class FolderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Folder
-        fields = ['id', 'client', 'vehicle', 'vehicle_id', 'type_folder', 
-                 'status', 'creation_date', 'modification_date', 'files']
-        read_only_fields = ['client', 'creation_date', 'modification_date'] 
+        fields = '__all__'
+        read_only_fields = ('client',) 

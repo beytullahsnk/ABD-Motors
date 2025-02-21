@@ -3,7 +3,12 @@ from .models import Vehicle
 
 @admin.register(Vehicle)
 class VehicleAdmin(admin.ModelAdmin):
-    list_display = ('brand', 'model', 'year', 'daily_rate', 'is_available')
-    list_filter = ('fuel_type', 'transmission', 'is_available')
-    search_fields = ('brand', 'model', 'description')
-    ordering = ('-created_at',)
+    list_display = ('brand', 'model', 'type_offer', 'state', 'date_added', 'get_image_url')
+    list_filter = ('type_offer', 'state', 'brand')
+    search_fields = ('brand', 'model')
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return "Pas d'image"
+    get_image_url.short_description = "URL de l'image"

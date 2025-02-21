@@ -3,11 +3,12 @@ import {
     Container,
     Grid,
     Typography,
-    Box,
-    CircularProgress,
+    Alert,
 } from '@mui/material';
 import VehicleCard from '../components/VehicleCard';
-import { getAvailableVehicles } from '../services/vehicleService';
+import LoadingScreen from '../components/LoadingScreen';
+import ErrorAlert from '../components/ErrorAlert';
+import { getVehicles } from '../services/vehicleService';
 
 const VehicleList = () => {
     const [vehicles, setVehicles] = useState([]);
@@ -17,11 +18,11 @@ const VehicleList = () => {
     useEffect(() => {
         const fetchVehicles = async () => {
             try {
-                const data = await getAvailableVehicles();
+                const data = await getVehicles();
                 setVehicles(data);
-                setLoading(false);
-            } catch (err) {
+            } catch (error) {
                 setError('Erreur lors du chargement des véhicules');
+            } finally {
                 setLoading(false);
             }
         };
@@ -30,19 +31,7 @@ const VehicleList = () => {
     }, []);
 
     if (loading) {
-        return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-                <CircularProgress />
-            </Box>
-        );
-    }
-
-    if (error) {
-        return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-                <Typography color="error">{error}</Typography>
-            </Box>
-        );
+        return <LoadingScreen message="Chargement des véhicules..." />;
     }
 
     return (
@@ -50,13 +39,22 @@ const VehicleList = () => {
             <Typography variant="h4" component="h1" gutterBottom>
                 Véhicules disponibles
             </Typography>
-            <Grid container spacing={3}>
-                {vehicles.map((vehicle) => (
-                    <Grid item xs={12} sm={6} md={4} key={vehicle.id}>
-                        <VehicleCard vehicle={vehicle} />
-                    </Grid>
-                ))}
-            </Grid>
+            
+            <ErrorAlert error={error} />
+            
+            {vehicles.length === 0 ? (
+                <Alert severity="info">
+                    Aucun véhicule disponible pour le moment
+                </Alert>
+            ) : (
+                <Grid container spacing={3}>
+                    {vehicles.map((vehicle) => (
+                        <Grid item xs={12} sm={6} md={4} key={vehicle.id}>
+                            <VehicleCard vehicle={vehicle} />
+                        </Grid>
+                    ))}
+                </Grid>
+            )}
         </Container>
     );
 };

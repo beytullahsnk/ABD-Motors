@@ -7,115 +7,231 @@ import {
     Typography,
     Box,
     Button,
-    CircularProgress,
-    Alert
+    Chip,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    IconButton,
+    Collapse,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { getAvailableVehicles } from '../services/vehicleService';
+import { getVehicles } from '../services/vehicleService';
+import { getUserFolders } from '../services/folderService';
 import VehicleCard from '../components/VehicleCard';
+import LoadingScreen from '../components/LoadingScreen';
+import ErrorAlert from '../components/ErrorAlert';
+import { formatDate, formatPrice } from '../utils/dateUtils';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { 
+    FOLDER_STATUS_LABELS, 
+    FOLDER_STATUS_COLORS 
+} from '../utils/constants';
+
+const getFolderStatusColor = (status) => {
+    switch (status) {
+        case 'PENDING':
+            return 'warning';
+        case 'APPROVED':
+            return 'success';
+        case 'REJECTED':
+            return 'error';
+        default:
+            return 'default';
+    }
+};
+
+const getFolderStatusLabel = (status) => {
+    switch (status) {
+        case 'PENDING':
+            return 'En attente';
+        case 'APPROVED':
+            return 'Approuvé';
+        case 'REJECTED':
+            return 'Refusé';
+        default:
+            return status;
+    }
+};
+
+const getFileTypeLabel = (fileType) => {
+    switch (fileType) {
+        case 'ID_CARD':
+            return 'Carte d\'identité';
+        case 'DRIVER_LICENSE':
+            return 'Permis de conduire';
+        case 'PROOF_ADDRESS':
+            return 'Justificatif de domicile';
+        case 'INCOME_PROOF':
+            return 'Justificatif de revenus';
+        case 'INSURANCE':
+            return 'Attestation d\'assurance';
+        case 'OTHER':
+            return 'Autre document';
+        default:
+            return fileType;
+    }
+};
+
+const FolderRow = ({ folder }) => {
+    const [open, setOpen] = useState(false);
+    const navigate = useNavigate();
+
+    return (
+        <>
+            <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+                <TableCell>
+                    <IconButton
+                        size="small"
+                        onClick={() => setOpen(!open)}
+                    >
+                        {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </IconButton>
+                </TableCell>
+                <TableCell>
+                    <Typography variant="subtitle2">
+                        {folder.vehicle.brand} {folder.vehicle.model}
+                    </Typography>
+                </TableCell>
+                <TableCell>
+                    <Chip
+                        label={getFolderStatusLabel(folder.status)}
+                        color={getFolderStatusColor(folder.status)}
+                        size="small"
+                    />
+                </TableCell>
+                <TableCell>
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => navigate(`/vehicles/${folder.vehicle.id}`)}
+                    >
+                        Voir le véhicule
+                    </Button>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+                    <Collapse in={open} timeout="auto" unmountOnExit>
+                        <Box sx={{ margin: 2 }}>
+                            <Typography variant="subtitle2" gutterBottom>
+                                Documents fournis:
+                            </Typography>
+                            <Stack direction="column" spacing={1}>
+                                {folder.files && folder.files.map((file, index) => (
+                                    <Box key={index}>
+                                        <Typography variant="body2">
+                                            {getFileTypeLabel(file.file_type)}
+                                        </Typography>
+                                    </Box>
+                                ))}
+                            </Stack>
+                        </Box>
+                    </Collapse>
+                </TableCell>
+            </TableRow>
+        </>
+    );
+};
 
 const Dashboard = () => {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [vehicles, setVehicles] = useState([]);
+    const [folders, setFolders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchVehicles = async () => {
+        const fetchData = async () => {
             try {
-                const data = await getAvailableVehicles();
-                console.log('Fetched vehicles:', data);
-                setVehicles(data);
-                setLoading(false);
-            } catch (err) {
-                console.error('Error in dashboard:', err);
-                setError(err.response?.data?.detail || 'Erreur lors du chargement des véhicules');
+                const [vehiclesData, foldersData] = await Promise.all([
+                    getVehicles(),
+                    getUserFolders()
+                ]);
+                setVehicles(vehiclesData);
+                setFolders(foldersData);
+            } catch (error) {
+                setError('Erreur lors du chargement des données');
+            } finally {
                 setLoading(false);
             }
         };
 
-        fetchVehicles();
+        fetchData();
     }, []);
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
-
-    useEffect(() => {
-        if (user) {
-            console.log('User in dashboard:', user);
-            console.log('First name:', user.first_name);
-            console.log('Last name:', user.last_name);
-        }
-    }, [user]);
-
     if (loading) {
-        return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-                <CircularProgress />
-            </Box>
-        );
-    }
-
-    // Si pas d'utilisateur, rediriger vers la page de connexion
-    if (!user) {
-        navigate('/login');
-        return null;
+        return <LoadingScreen message="Chargement du tableau de bord..." />;
     }
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <ErrorAlert error={error} />
+            
             {/* En-tête avec profil utilisateur */}
-            <Grid container spacing={3}>
-                <Grid item xs={12}>
-                    <Paper sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                        <Box>
-                            <Typography variant="h6" component="h1">
-                                Bienvenue, {user.first_name} {user.last_name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {user.email}
-                            </Typography>
-                        </Box>
-                        <Button
-                            variant="outlined"
-                            color="secondary"
-                            onClick={handleLogout}
-                        >
-                            Se déconnecter
-                        </Button>
-                    </Paper>
-                </Grid>
+            <Paper sx={{ p: 2, mb: 3 }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Box>
+                        <Typography variant="h6">
+                            Bienvenue, {user.first_name} {user.last_name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            {user.email}
+                        </Typography>
+                    </Box>
+                </Box>
+            </Paper>
 
-                {/* Liste des véhicules disponibles */}
-                <Grid item xs={12}>
-                    <Typography variant="h5" gutterBottom>
-                        Véhicules disponibles
+            {/* Dossiers de location */}
+            <Paper sx={{ p: 2, mb: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                    Mes dossiers de location
+                </Typography>
+                {folders.length === 0 ? (
+                    <Typography color="text.secondary">
+                        Vous n'avez pas encore de dossier de location
                     </Typography>
-                    {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
-                            {error}
-                        </Alert>
-                    )}
-                    {vehicles.length === 0 && !error ? (
-                        <Alert severity="info">
-                            Aucun véhicule disponible pour le moment
-                        </Alert>
-                    ) : (
-                        <Grid container spacing={3}>
-                            {vehicles.map((vehicle) => (
-                                <Grid item xs={12} sm={6} md={4} key={vehicle.id}>
-                                    <VehicleCard vehicle={vehicle} />
-                                </Grid>
-                            ))}
+                ) : (
+                    <TableContainer>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell width={50} />
+                                    <TableCell>Véhicule</TableCell>
+                                    <TableCell>Statut</TableCell>
+                                    <TableCell>Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {folders.map((folder) => (
+                                    <FolderRow key={folder.id} folder={folder} />
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )}
+            </Paper>
+
+            {/* Véhicules disponibles */}
+            <Box mb={3}>
+                <Typography variant="h6" gutterBottom>
+                    Véhicules disponibles
+                </Typography>
+                <Grid container spacing={3}>
+                    {vehicles.map((vehicle) => (
+                        <Grid item xs={12} sm={6} md={4} key={vehicle.id}>
+                            <VehicleCard vehicle={vehicle} />
                         </Grid>
-                    )}
+                    ))}
                 </Grid>
-            </Grid>
+            </Box>
         </Container>
     );
 };
 
-export default Dashboard; 
+export default Dashboard;

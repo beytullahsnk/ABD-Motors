@@ -24,7 +24,7 @@ const Login = () => {
 
         try {
             await loginUser(login, password);
-            navigate('/dashboard');
+            navigate('/profile');
         } catch (error) {
             console.error('Login error:', error.response?.data);
             if (error.response?.status === 401) {

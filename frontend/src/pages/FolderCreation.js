@@ -219,10 +219,10 @@ const FolderCreation = () => {
                         </Typography>
                         <Button
                             variant="contained"
-                            onClick={() => navigate('/dashboard')}
+                            onClick={() => navigate('/profile')}
                             sx={{ mt: 3 }}
                         >
-                            Retour au tableau de bord
+                            Voir mes dossiers
                         </Button>
                     </Box>
                 );

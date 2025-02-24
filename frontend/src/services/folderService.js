@@ -1,13 +1,6 @@
 import api from './api';
 
-export const createFolder = async (folderData) => {
-    const formData = new FormData();
-    
-    // Convertir les données du dossier en FormData
-    Object.keys(folderData).forEach(key => {
-        formData.append(key, folderData[key]);
-    });
-
+export const createFolder = async (formData) => {
     const { data } = await api.post('/folders/', formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
@@ -18,5 +11,10 @@ export const createFolder = async (folderData) => {
 
 export const getUserFolders = async () => {
     const { data } = await api.get('/folders/');
+    return data;
+};
+
+export const updateFolderStatus = async (folderId, status) => {
+    const { data } = await api.patch(`/folders/${folderId}/`, { status });
     return data;
 }; 

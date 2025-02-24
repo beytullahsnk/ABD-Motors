@@ -214,11 +214,39 @@ const Profile = () => {
 
     const handleStatusChange = async (folderId, newStatus, rejectionReason = '') => {
         try {
+            // Mettre à jour le statut du dossier
             await api.post(`/folders/${folderId}/change_status/`, {
                 status: newStatus,
                 rejection_reason: rejectionReason
             });
+
+            // Trouver le dossier concerné
+            const folder = folders.find(f => f.id === folderId);
+            if (folder && folder.vehicle) {
+                // Si le dossier est validé
+                if (newStatus === 'VALIDATED') {
+                    // Mettre à jour l'état du véhicule et assigner le client
+                    await api.patch(`/vehicles/${folder.vehicle.id}/`, {
+                        state: folder.type_folder === 'PURCHASE' ? 'SOLD' : 'RENTED',
+                        [folder.type_folder === 'PURCHASE' ? 'owner' : 'renter']: folder.client.id,
+                        rental_start_date: folder.type_folder === 'RENTAL' ? new Date().toISOString() : null
+                    });
+                }
+                // Si le dossier est rejeté
+                else if (newStatus === 'REJECTED') {
+                    // Remettre le véhicule comme disponible et retirer le client
+                    await api.patch(`/vehicles/${folder.vehicle.id}/`, {
+                        state: 'AVAILABLE',
+                        owner: null,
+                        renter: null,
+                        rental_start_date: null,
+                        rental_end_date: null
+                    });
+                }
+            }
+
             setSuccess('Statut du dossier mis à jour avec succès');
+            // Rafraîchir les données
             fetchFolders();
         } catch (err) {
             setError('Erreur lors de la mise à jour du statut');

@@ -16,6 +16,7 @@ import { createFolder } from '../services/folderService';
 import LoadingScreen from '../components/LoadingScreen';
 import ErrorAlert from '../components/ErrorAlert';
 import { FOLDER_STATUS } from '../utils/constants';
+import api from '../services/api';
 
 const steps = ['Documents requis', 'Confirmation'];
 
@@ -67,19 +68,54 @@ const PurchaseCreation = () => {
     const handleSubmit = async () => {
         try {
             setLoading(true);
-            const formData = new FormData();
-            formData.append('vehicle', id);
-            formData.append('type_folder', 'PURCHASE');
-            formData.append('id_card', folderData.idCard);
-            formData.append('proof_address', folderData.proofAddress);
-            formData.append('income_proof', folderData.incomeProof);
-            formData.append('signed_contract', folderData.signedContract);
-            formData.append('status', FOLDER_STATUS.PENDING);
+            
+            // Créer d'abord le dossier
+            const folderFormData = new FormData();
+            folderFormData.append('vehicle_id', id);
+            folderFormData.append('type_folder', 'PURCHASE');
+            folderFormData.append('status', 'PENDING');
 
-            await createFolder(formData);
+            // Créer le dossier
+            const folderResponse = await createFolder(folderFormData);
+            console.log('Dossier créé avec succès:', folderResponse);
+
+            // Ajouter les fichiers un par un
+            const fileUploads = [
+                { file: folderData.idCard, type: 'ID_CARD' },
+                { file: folderData.proofAddress, type: 'PROOF_ADDRESS' },
+                { file: folderData.incomeProof, type: 'INCOME_PROOF' },
+                { file: folderData.signedContract, type: 'SIGNED_CONTRACT' }
+            ];
+
+            // Upload chaque fichier
+            for (const fileData of fileUploads) {
+                if (fileData.file) {
+                    const fileFormData = new FormData();
+                    fileFormData.append('file', fileData.file);
+                    fileFormData.append('file_type', fileData.type);
+                    
+                    await api.post(`/folders/${folderResponse.id}/files/`, fileFormData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    });
+                }
+            }
+
+            console.log('Tous les fichiers ont été uploadés avec succès');
             handleNext();
         } catch (error) {
-            setError('Erreur lors de la création du dossier');
+            console.error('Erreur détaillée:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                config: error.config
+            });
+            setError(
+                error.response?.data?.detail || 
+                error.response?.data?.message || 
+                'Une erreur est survenue lors de la création du dossier'
+            );
         } finally {
             setLoading(false);
         }
@@ -159,10 +195,10 @@ const PurchaseCreation = () => {
                         </Typography>
                         <Button
                             variant="contained"
-                            onClick={() => navigate('/dashboard')}
+                            onClick={() => navigate('/profile')}
                             sx={{ mt: 3 }}
                         >
-                            Retour au tableau de bord
+                            Voir mes dossiers
                         </Button>
                     </Box>
                 );

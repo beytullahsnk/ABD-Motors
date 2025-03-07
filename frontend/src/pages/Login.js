@@ -23,8 +23,13 @@ const Login = () => {
         setError(''); // Réinitialiser l'erreur
 
         try {
-            await loginUser(login, password);
-            navigate('/profile');
+            const user = await loginUser(login, password);
+            // Redirection conditionnelle selon le rôle
+            if (user.role === 'ADMIN') {
+                navigate('/profile');
+            } else {
+                navigate('/vehicles');
+            }
         } catch (error) {
             console.error('Login error:', error.response?.data);
             if (error.response?.status === 401) {

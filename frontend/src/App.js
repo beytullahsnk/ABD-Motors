@@ -47,6 +47,11 @@ const PrivateRoute = ({ children, requireAdmin }) => {
     );
 };
 
+const DefaultRedirect = () => {
+    const { user } = useAuth();
+    return <Navigate to={user?.role === 'ADMIN' ? '/profile' : '/vehicles'} />;
+};
+
 const App = () => {
     return (
         <ThemeProvider theme={theme}>
@@ -101,8 +106,8 @@ const App = () => {
                             />
 
                             {/* Redirection par défaut */}
-                            <Route path="/" element={<Navigate to="/vehicles" />} />
-                            <Route path="*" element={<Navigate to="/vehicles" />} />
+                            <Route path="/" element={<DefaultRedirect />} />
+                            <Route path="*" element={<DefaultRedirect />} />
                         </Routes>
                     </Router>
                 </AuthProvider>

@@ -31,7 +31,6 @@ const PurchaseCreation = () => {
         idCard: null,
         proofAddress: null,
         incomeProof: null,
-        signedContract: null,
     });
 
     useEffect(() => {
@@ -68,28 +67,49 @@ const PurchaseCreation = () => {
     const handleSubmit = async () => {
         try {
             setLoading(true);
+            setError(null);
+
+            // Vérifier si le véhicule est toujours disponible
+            const vehicleData = await getVehicleById(id);
+            if (vehicleData.state !== 'AVAILABLE') {
+                setError('Ce véhicule n\'est plus disponible à l\'achat');
+                return;
+            }
+
+            // Vérifier que tous les fichiers sont valides
+            const fileUploads = [
+                { file: folderData.idCard, type: 'ID_CARD', name: 'Carte d\'identité' },
+                { file: folderData.proofAddress, type: 'PROOF_ADDRESS', name: 'Justificatif de domicile' },
+                { file: folderData.incomeProof, type: 'INCOME_PROOF', name: 'Justificatif de revenus' }
+            ];
+
+            // Vérifier le type de chaque fichier avant de créer le dossier
+            const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+            for (const fileData of fileUploads) {
+                if (!fileData.file) {
+                    throw new Error(`Le fichier ${fileData.name} est manquant`);
+                }
+                if (!acceptedTypes.includes(fileData.file.type)) {
+                    throw new Error(`Le fichier ${fileData.name} doit être une image (JPEG/PNG/WebP) ou un PDF`);
+                }
+            }
             
-            // Créer d'abord le dossier
+            // Une fois les fichiers validés, créer le dossier
             const folderFormData = new FormData();
             folderFormData.append('vehicle_id', id);
             folderFormData.append('type_folder', 'PURCHASE');
-            folderFormData.append('status', 'PENDING');
 
-            // Créer le dossier
-            const folderResponse = await createFolder(folderFormData);
-            console.log('Dossier créé avec succès:', folderResponse);
-
-            // Ajouter les fichiers un par un
-            const fileUploads = [
-                { file: folderData.idCard, type: 'ID_CARD' },
-                { file: folderData.proofAddress, type: 'PROOF_ADDRESS' },
-                { file: folderData.incomeProof, type: 'INCOME_PROOF' },
-                { file: folderData.signedContract, type: 'SIGNED_CONTRACT' }
-            ];
+            let folderResponse;
+            try {
+                folderResponse = await createFolder(folderFormData);
+                console.log('Dossier créé avec succès:', folderResponse);
+            } catch (error) {
+                throw new Error('Erreur lors de la création du dossier: ' + (error.response?.data?.detail || error.message));
+            }
 
             // Upload chaque fichier
-            for (const fileData of fileUploads) {
-                if (fileData.file) {
+            try {
+                for (const fileData of fileUploads) {
                     const fileFormData = new FormData();
                     fileFormData.append('file', fileData.file);
                     fileFormData.append('file_type', fileData.type);
@@ -100,22 +120,24 @@ const PurchaseCreation = () => {
                         },
                     });
                 }
+                console.log('Tous les fichiers ont été uploadés avec succès');
+                handleNext();
+            } catch (uploadError) {
+                // Si l'upload échoue, on devrait supprimer le dossier créé
+                try {
+                    await api.delete(`/folders/${folderResponse.id}/`);
+                } catch (deleteError) {
+                    console.error('Erreur lors de la suppression du dossier:', deleteError);
+                }
+                throw new Error(`Erreur lors de l'upload des fichiers: ${uploadError.message}`);
             }
-
-            console.log('Tous les fichiers ont été uploadés avec succès');
-            handleNext();
         } catch (error) {
             console.error('Erreur détaillée:', {
                 message: error.message,
                 response: error.response?.data,
-                status: error.response?.status,
-                config: error.config
+                status: error.response?.status
             });
-            setError(
-                error.response?.data?.detail || 
-                error.response?.data?.message || 
-                'Une erreur est survenue lors de la création du dossier'
-            );
+            setError(error.message || error.response?.data?.detail || 'Une erreur est survenue lors de la création du dossier');
         } finally {
             setLoading(false);
         }
@@ -128,7 +150,7 @@ const PurchaseCreation = () => {
                     <Grid container spacing={3}>
                         <Grid item xs={12}>
                             <input
-                                accept="image/*,.pdf"
+                                accept="image/jpeg,image/png,image/webp,application/pdf"
                                 style={{ display: 'none' }}
                                 id="id-card-upload"
                                 type="file"
@@ -142,7 +164,7 @@ const PurchaseCreation = () => {
                         </Grid>
                         <Grid item xs={12}>
                             <input
-                                accept="image/*,.pdf"
+                                accept="image/jpeg,image/png,image/webp,application/pdf"
                                 style={{ display: 'none' }}
                                 id="proof-address-upload"
                                 type="file"
@@ -156,7 +178,7 @@ const PurchaseCreation = () => {
                         </Grid>
                         <Grid item xs={12}>
                             <input
-                                accept="image/*,.pdf"
+                                accept="image/jpeg,image/png,image/webp,application/pdf"
                                 style={{ display: 'none' }}
                                 id="income-proof-upload"
                                 type="file"
@@ -165,20 +187,6 @@ const PurchaseCreation = () => {
                             <label htmlFor="income-proof-upload">
                                 <Button variant="outlined" component="span" fullWidth>
                                     {folderData.incomeProof ? 'Justificatif de revenus chargé' : 'Charger le justificatif de revenus'}
-                                </Button>
-                            </label>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <input
-                                accept="image/*,.pdf"
-                                style={{ display: 'none' }}
-                                id="contract-upload"
-                                type="file"
-                                onChange={(e) => handleFileUpload(e, 'signedContract')}
-                            />
-                            <label htmlFor="contract-upload">
-                                <Button variant="outlined" component="span" fullWidth>
-                                    {folderData.signedContract ? 'Contrat signé chargé' : 'Charger le contrat signé'}
                                 </Button>
                             </label>
                         </Grid>
@@ -191,7 +199,7 @@ const PurchaseCreation = () => {
                             Dossier créé avec succès !
                         </Typography>
                         <Typography variant="body1" gutterBottom>
-                            Votre dossier d'achat a été soumis et est en attente de validation.
+                            Votre dossier d'achat a été soumis et est en attente de validation. Une fois vos documents validés, nous vous enverrons le contrat à signer.
                         </Typography>
                         <Button
                             variant="contained"
@@ -225,7 +233,7 @@ const PurchaseCreation = () => {
                 )}
                 
                 <Typography variant="h4" gutterBottom>
-                    {activeStep === 1 ? 'Achat confirmé' : 'Achat de véhicule'}
+                    {activeStep === 1 ? 'Dossier soumis' : 'Achat de véhicule'}
                 </Typography>
 
                 <ErrorAlert error={error} />
@@ -252,10 +260,10 @@ const PurchaseCreation = () => {
                                     variant="contained"
                                     onClick={activeStep === steps.length - 2 ? handleSubmit : handleNext}
                                     disabled={
-                                        activeStep === 0 && (!folderData.idCard || !folderData.proofAddress || !folderData.incomeProof || !folderData.signedContract)
+                                        activeStep === 0 && (!folderData.idCard || !folderData.proofAddress || !folderData.incomeProof)
                                     }
                                 >
-                                    {activeStep === steps.length - 2 ? 'Confirmer l\'achat' : 'Suivant'}
+                                    {activeStep === steps.length - 2 ? 'Soumettre le dossier' : 'Suivant'}
                                 </Button>
                             </>
                         )}

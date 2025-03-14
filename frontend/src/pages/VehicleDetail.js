@@ -225,7 +225,7 @@ const VehicleDetail = () => {
                             <Stack direction="row" spacing={1}>
                                 <Chip 
                                     label={vehicle.type_offer === 'RENTAL' ? 'À louer' : 'À vendre'} 
-                                    color={vehicle.type_offer === 'RENTAL' ? 'primary' : 'secondary'}
+                                    color="primary"
                                 />
                                 {vehicle.has_insurance && (
                                     <Chip label="Assuré" color="success" />

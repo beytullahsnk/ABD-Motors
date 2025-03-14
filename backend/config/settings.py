@@ -154,10 +154,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-MEDIA_URL = '/media/'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
@@ -167,27 +167,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'user.User'
 
-# Simplifiez la configuration du stockage
-USE_S3 = os.getenv('USE_S3', 'False') == 'True'
-
-if USE_S3:
-    STATICFILES_STORAGE = 'config.storage_backends.StaticStorage'
-    DEFAULT_FILE_STORAGE = 'config.storage_backends.MediaStorage'
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-else:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-    STATIC_URL = '/static/'
-    MEDIA_URL = '/media/'
-
-# Ces configurations doivent être toujours présentes
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Storage settings
-if os.getenv('USE_S3', 'False') == 'True':
-    DEFAULT_FILE_STORAGE = 'config.storage_backends.MediaStorage'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+# Static files (CSS, JavaScript, Images)
+STATICFILES_STORAGE = 'config.storage_backends.StaticStorage'
+DEFAULT_FILE_STORAGE = 'config.storage_backends.MediaStorage'
 
 # AWS Configuration
 AWS_S3_ADDRESSING_STYLE = 'virtual'

@@ -9,12 +9,16 @@ import {
     Chip,
     Stack,
     Box,
-    Divider
+    Divider,
+    IconButton,
+    Fade
 } from '@mui/material';
-import { getVehicleById } from '../services/vehicleService';
+import { getVehicleById, getAdjacentVehicles } from '../services/vehicleService';
 import LoadingScreen from '../components/LoadingScreen';
 import ErrorAlert from '../components/ErrorAlert';
 import { formatPrice } from '../utils/dateUtils';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
 const getStatusColor = (state) => {
     switch (state) {
@@ -51,61 +55,77 @@ const VehicleDetail = () => {
     const [vehicle, setVehicle] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [adjacentVehicles, setAdjacentVehicles] = useState({ previous: null, next: null });
 
     useEffect(() => {
-        const fetchVehicle = async () => {
+        const fetchData = async () => {
             try {
-                const data = await getVehicleById(id);
-                setVehicle(data);
+                setLoading(true);
+                // Charger d'abord les données du véhicule
+                const vehicleData = await getVehicleById(id);
+                setVehicle(vehicleData);
+                setLoading(false);
+
+                // Charger les véhicules adjacents en arrière-plan
+                const adjacentData = await getAdjacentVehicles(id);
+                setAdjacentVehicles(adjacentData);
             } catch (error) {
                 setError('Erreur lors du chargement du véhicule');
-            } finally {
                 setLoading(false);
             }
         };
 
-        fetchVehicle();
+        fetchData();
     }, [id]);
+
+    const handleNavigate = (vehicleId) => {
+        navigate(`/vehicles/${vehicleId}`);
+    };
 
     const getPriceDisplay = () => {
         if (!vehicle) return '';
         
         if (vehicle.type_offer === 'RENTAL') {
             return (
-                <Box>
-                    <Typography variant="h4" color="primary" gutterBottom>
-                        {formatPrice(vehicle.rental_price)}/jour
-                    </Typography>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography variant="body2" color="text.secondary">
-                            Location
+                <Box sx={{ position: 'relative', mb: 2 }}>
+                    <Typography 
+                        variant="h3" 
+                        sx={{ 
+                            fontWeight: 700,
+                            color: 'primary.main',
+                            mb: 1,
+                            display: 'flex',
+                            alignItems: 'baseline'
+                        }}
+                    >
+                        {formatPrice(vehicle.rental_price)}
+                        <Typography 
+                            component="span" 
+                            sx={{ 
+                                fontSize: '1.2rem',
+                                ml: 1,
+                                color: 'text.secondary',
+                                fontWeight: 500
+                            }}
+                        >
+                            /jour
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">•</Typography>
-                        <Chip 
-                            label={getStatusLabel(vehicle.state, vehicle.type_offer)}
-                            color={getStatusColor(vehicle.state)}
-                            size="small"
-                        />
-                    </Stack>
+                    </Typography>
                 </Box>
             );
         } else if (vehicle.type_offer === 'SALE') {
             return (
-                <Box>
-                    <Typography variant="h4" color="primary" gutterBottom>
+                <Box sx={{ position: 'relative', mb: 2 }}>
+                    <Typography 
+                        variant="h3" 
+                        sx={{ 
+                            fontWeight: 700,
+                            color: 'primary.main',
+                            mb: 1
+                        }}
+                    >
                         {formatPrice(vehicle.sale_price)}
                     </Typography>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography variant="body2" color="text.secondary">
-                            Vente
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">•</Typography>
-                        <Chip 
-                            label={getStatusLabel(vehicle.state, vehicle.type_offer)}
-                            color={getStatusColor(vehicle.state)}
-                            size="small"
-                        />
-                    </Stack>
                 </Box>
             );
         }
@@ -158,94 +178,363 @@ const VehicleDetail = () => {
     }
 
     return (
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4, position: 'relative' }}>
             <ErrorAlert error={error} />
-            <Paper sx={{ p: 3, position: 'relative' }}>
-                <Button
-                    variant="outlined"
-                    sx={{ position: 'absolute', top: 16, right: 16 }}
-                    onClick={() => navigate(-1)}
+            
+            {/* Navigation Arrows */}
+            <Box>
+                <IconButton
+                    sx={{
+                        position: 'fixed',
+                        left: { xs: 20, md: 40 },
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        zIndex: 10,
+                        bgcolor: 'rgba(255, 255, 255, 0.9)',
+                        backdropFilter: 'blur(8px)',
+                        width: { xs: 48, md: 64 },
+                        height: { xs: 48, md: 64 },
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        opacity: adjacentVehicles.previous ? 1 : 0.5,
+                        pointerEvents: adjacentVehicles.previous ? 'auto' : 'none',
+                        '&:hover': {
+                            bgcolor: 'background.paper',
+                            transform: adjacentVehicles.previous ? 'translateY(-50%) scale(1.1)' : 'translateY(-50%)',
+                            boxShadow: adjacentVehicles.previous ? '0 8px 24px rgba(0,0,0,0.15)' : 'none',
+                            '& .MuiSvgIcon-root': {
+                                transform: adjacentVehicles.previous ? 'translateX(-4px)' : 'none',
+                                color: adjacentVehicles.previous ? 'primary.main' : 'text.disabled',
+                            }
+                        },
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                    onClick={() => adjacentVehicles.previous && handleNavigate(adjacentVehicles.previous)}
                 >
-                    Retour
+                    <ArrowBackIosNewIcon 
+                        sx={{ 
+                            fontSize: { xs: 24, md: 28 },
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            color: adjacentVehicles.previous ? 'text.primary' : 'text.disabled',
+                        }} 
+                    />
+                </IconButton>
+                <IconButton
+                    sx={{
+                        position: 'fixed',
+                        right: { xs: 20, md: 40 },
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        zIndex: 10,
+                        bgcolor: 'rgba(255, 255, 255, 0.9)',
+                        backdropFilter: 'blur(8px)',
+                        width: { xs: 48, md: 64 },
+                        height: { xs: 48, md: 64 },
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        opacity: adjacentVehicles.next ? 1 : 0.5,
+                        pointerEvents: adjacentVehicles.next ? 'auto' : 'none',
+                        '&:hover': {
+                            bgcolor: 'background.paper',
+                            transform: adjacentVehicles.next ? 'translateY(-50%) scale(1.1)' : 'translateY(-50%)',
+                            boxShadow: adjacentVehicles.next ? '0 8px 24px rgba(0,0,0,0.15)' : 'none',
+                            '& .MuiSvgIcon-root': {
+                                transform: adjacentVehicles.next ? 'translateX(4px)' : 'none',
+                                color: adjacentVehicles.next ? 'primary.main' : 'text.disabled',
+                            }
+                        },
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                    onClick={() => adjacentVehicles.next && handleNavigate(adjacentVehicles.next)}
+                >
+                    <ArrowForwardIosIcon 
+                        sx={{ 
+                            fontSize: { xs: 24, md: 28 },
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            color: adjacentVehicles.next ? 'text.primary' : 'text.disabled',
+                        }} 
+                    />
+                </IconButton>
+            </Box>
+
+            <Paper 
+                sx={{ 
+                    position: 'relative',
+                    overflow: 'hidden',
+                    bgcolor: 'background.paper',
+                    borderRadius: 4,
+                    boxShadow: '0 12px 48px rgba(0,0,0,0.08)',
+                    transition: 'all 0.3s ease-in-out',
+                    '&:hover': {
+                        boxShadow: '0 16px 56px rgba(0,0,0,0.12)',
+                    }
+                }}
+                elevation={0}
+            >
+                <Button
+                    variant="contained"
+                    sx={{ 
+                        position: 'absolute',
+                        top: 24,
+                        left: 24,
+                        zIndex: 2,
+                        bgcolor: 'rgba(255, 255, 255, 0.9)',
+                        color: 'text.primary',
+                        backdropFilter: 'blur(8px)',
+                        borderRadius: '16px',
+                        px: 3,
+                        py: 1.2,
+                        fontWeight: 600,
+                        '&:hover': {
+                            bgcolor: 'background.paper',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                        },
+                        transition: 'all 0.2s ease-in-out'
+                    }}
+                    onClick={() => navigate('/vehicles')}
+                >
+                    ← Retour
                 </Button>
 
-                <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
-                        <Box sx={{ position: 'relative' }}>
+                <Grid container>
+                    <Grid item xs={12} md={7}>
+                        <Box 
+                            sx={{ 
+                                position: 'relative',
+                                height: { xs: '300px', md: '600px' },
+                                overflow: 'hidden',
+                            }}
+                        >
                             <img
                                 src={vehicle.image || '/images/placeholder-car.jpg'}
                                 alt={`${vehicle.brand} ${vehicle.model}`}
                                 style={{
                                     width: '100%',
-                                    height: 'auto',
-                                    borderRadius: '8px',
-                                    objectFit: 'cover'
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    filter: vehicle.state !== 'AVAILABLE' ? 'brightness(0.8)' : 'none',
+                                    transition: 'all 0.5s ease-in-out',
                                 }}
                                 onError={(e) => {
                                     e.target.src = '/images/placeholder-car.jpg';
                                 }}
                             />
-                            <Chip 
-                                label={getStatusLabel(vehicle.state, vehicle.type_offer)}
-                                color={getStatusColor(vehicle.state)}
+                            <Box
                                 sx={{
                                     position: 'absolute',
-                                    top: 16,
-                                    right: 16,
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    background: 'linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.5))',
+                                    opacity: 0.8,
+                                }}
+                            />
+                            <Chip 
+                                label={getStatusLabel(vehicle.state, vehicle.type_offer)}
+                                sx={{
+                                    position: 'absolute',
+                                    top: 24,
+                                    right: 24,
+                                    height: '36px',
+                                    backgroundColor: theme => {
+                                        switch (vehicle.state) {
+                                            case 'AVAILABLE':
+                                                return 'rgba(39, 174, 96, 0.95)';
+                                            case 'RESERVED':
+                                                return 'rgba(243, 156, 18, 0.95)';
+                                            case 'SOLD':
+                                            case 'RENTED':
+                                                return 'rgba(231, 76, 60, 0.95)';
+                                            default:
+                                                return 'rgba(127, 140, 141, 0.95)';
+                                        }
+                                    },
+                                    color: '#FFFFFF',
+                                    fontWeight: 600,
+                                    fontSize: '0.95rem',
+                                    letterSpacing: '0.02em',
+                                    backdropFilter: 'blur(8px)',
+                                    border: 'none',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                    '& .MuiChip-label': {
+                                        padding: '0 16px',
+                                    },
+                                    transition: 'all 0.3s ease-in-out',
+                                    '&:hover': {
+                                        transform: 'translateY(-1px)',
+                                        boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
+                                    }
                                 }}
                             />
                         </Box>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        <Typography variant="h4" gutterBottom>
-                            {vehicle.brand} {vehicle.model}
-                        </Typography>
-                        
-                        {getPriceDisplay()}
-                        
-                        <Divider sx={{ my: 2 }} />
-                        
-                        <Stack spacing={2}>
-                            <Box>
-                                <Typography variant="subtitle1" color="text.secondary">
-                                    Année
-                                </Typography>
-                                <Typography variant="body1">
-                                    {vehicle.year}
-                                </Typography>
-                            </Box>
-                            <Box>
-                                <Typography variant="subtitle1" color="text.secondary">
-                                    Kilométrage
-                                </Typography>
-                                <Typography variant="body1">
-                                    {vehicle.mileage} km
-                                </Typography>
-                            </Box>
-                            <Stack direction="row" spacing={1}>
+                    <Grid item xs={12} md={5}>
+                        <Box 
+                            sx={{ 
+                                p: { xs: 3, md: 6 },
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                position: 'relative',
+                                bgcolor: 'background.paper',
+                            }}
+                        >
+                            <Typography 
+                                variant="h3" 
+                                sx={{ 
+                                    fontWeight: 800,
+                                    color: 'text.primary',
+                                    mb: 2,
+                                    fontSize: { xs: '2.2rem', md: '2.8rem' },
+                                    lineHeight: 1.2,
+                                    letterSpacing: '-0.02em',
+                                }}
+                            >
+                                {vehicle.brand} {vehicle.model}
+                            </Typography>
+                            
+                            {getPriceDisplay()}
+                            
+                            <Divider sx={{ my: 4, opacity: 0.6 }} />
+                            
+                            <Grid container spacing={4} sx={{ mb: 4 }}>
+                                <Grid item xs={6}>
+                                    <Typography 
+                                        variant="subtitle2" 
+                                        color="text.secondary" 
+                                        sx={{ mb: 1, fontSize: '0.95rem', fontWeight: 500 }}
+                                    >
+                                        Année
+                                    </Typography>
+                                    <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '1.5rem' }}>
+                                        {vehicle.year}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography 
+                                        variant="subtitle2" 
+                                        color="text.secondary" 
+                                        sx={{ mb: 1, fontSize: '0.95rem', fontWeight: 500 }}
+                                    >
+                                        Kilométrage
+                                    </Typography>
+                                    <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '1.5rem' }}>
+                                        {vehicle.mileage.toLocaleString()} km
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+
+                            <Stack 
+                                direction="row" 
+                                spacing={2} 
+                                sx={{ 
+                                    flexWrap: 'wrap',
+                                    gap: 2,
+                                    mb: 4
+                                }}
+                            >
                                 <Chip 
                                     label={vehicle.type_offer === 'RENTAL' ? 'À louer' : 'À vendre'} 
-                                    color="primary"
+                                    sx={{
+                                        bgcolor: 'primary.main',
+                                        color: 'white',
+                                        fontWeight: 600,
+                                        fontSize: '0.95rem',
+                                        height: '36px',
+                                        borderRadius: '12px',
+                                        '& .MuiChip-label': {
+                                            px: 2.5
+                                        },
+                                        transition: 'all 0.2s ease-in-out',
+                                        '&:hover': {
+                                            transform: 'translateY(-1px)',
+                                        }
+                                    }}
                                 />
                                 {vehicle.has_insurance && (
-                                    <Chip label="Assuré" color="success" />
+                                    <Chip 
+                                        label="Assuré" 
+                                        sx={{
+                                            bgcolor: 'rgba(39, 174, 96, 0.1)',
+                                            color: 'success.dark',
+                                            fontWeight: 600,
+                                            fontSize: '0.95rem',
+                                            height: '36px',
+                                            borderRadius: '12px',
+                                            '& .MuiChip-label': {
+                                                px: 2.5
+                                            },
+                                            transition: 'all 0.2s ease-in-out',
+                                            '&:hover': {
+                                                transform: 'translateY(-1px)',
+                                                bgcolor: 'rgba(39, 174, 96, 0.15)',
+                                            }
+                                        }}
+                                    />
                                 )}
                                 {vehicle.has_maintenance && (
-                                    <Chip label="Entretenu" color="success" />
+                                    <Chip 
+                                        label="Entretenu" 
+                                        sx={{
+                                            bgcolor: 'rgba(39, 174, 96, 0.1)',
+                                            color: 'success.dark',
+                                            fontWeight: 600,
+                                            fontSize: '0.95rem',
+                                            height: '36px',
+                                            borderRadius: '12px',
+                                            '& .MuiChip-label': {
+                                                px: 2.5
+                                            },
+                                            transition: 'all 0.2s ease-in-out',
+                                            '&:hover': {
+                                                transform: 'translateY(-1px)',
+                                                bgcolor: 'rgba(39, 174, 96, 0.15)',
+                                            }
+                                        }}
+                                    />
                                 )}
                             </Stack>
-                            <Box>
-                                <Typography variant="subtitle1" color="text.secondary">
+
+                            <Box sx={{ mb: 6 }}>
+                                <Typography 
+                                    variant="h6" 
+                                    sx={{ 
+                                        mb: 2,
+                                        fontWeight: 600,
+                                        color: 'text.primary',
+                                    }}
+                                >
                                     Description
                                 </Typography>
-                                <Typography variant="body1">
+                                <Typography 
+                                    variant="body1" 
+                                    sx={{ 
+                                        color: 'text.secondary',
+                                        lineHeight: 1.8,
+                                        fontSize: '1.05rem',
+                                        letterSpacing: '0.01em',
+                                    }}
+                                >
                                     {vehicle.description || "Aucune description disponible"}
                                 </Typography>
                             </Box>
-                        </Stack>
-                        
-                        <Box mt={4}>
-                            {getActionButton()}
+                            
+                            <Box 
+                                sx={{ 
+                                    mt: 'auto',
+                                    pt: 4,
+                                    position: 'sticky',
+                                    bottom: 0,
+                                    bgcolor: 'background.paper',
+                                    borderTop: '1px solid',
+                                    borderColor: 'divider',
+                                    zIndex: 1,
+                                }}
+                            >
+                                {getActionButton()}
+                            </Box>
                         </Box>
                     </Grid>
                 </Grid>

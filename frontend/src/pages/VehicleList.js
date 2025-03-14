@@ -35,7 +35,7 @@ const VehicleList = () => {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState('ALL');
-    const [sortBy, setSortBy] = useState('date');
+    const [sortBy, setSortBy] = useState('year_desc');
     const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
 
     useEffect(() => {
@@ -69,17 +69,19 @@ const VehicleList = () => {
                 case 'price_desc':
                     return (b.type_offer === 'SALE' ? b.sale_price : b.rental_price) -
                            (a.type_offer === 'SALE' ? a.sale_price : a.rental_price);
-                case 'date':
-                    return new Date(b.date_added) - new Date(a.date_added);
+                case 'year_desc':
+                    return b.year - a.year;
+                case 'year_asc':
+                    return a.year - b.year;
                 default:
-                    return 0;
+                    return b.year - a.year;
             }
         });
 
     const handleResetFilters = () => {
         setSearchTerm('');
         setTypeFilter('ALL');
-        setSortBy('date');
+        setSortBy('year_desc');
         setShowOnlyAvailable(false);
     };
 
@@ -212,7 +214,8 @@ const VehicleList = () => {
                                         </InputAdornment>
                                     }
                                 >
-                                    <MenuItem value="date">Plus récents</MenuItem>
+                                    <MenuItem value="year_desc">Plus récents</MenuItem>
+                                    <MenuItem value="year_asc">Plus anciens</MenuItem>
                                     <MenuItem value="price_asc">Prix croissant</MenuItem>
                                     <MenuItem value="price_desc">Prix décroissant</MenuItem>
                                 </Select>

@@ -132,11 +132,11 @@ const VehicleCard = ({ vehicle }) => {
                     <Chip 
                         label={vehicle.type_offer === 'RENTAL' ? 'À louer' : 'À vendre'} 
                         sx={{ 
-                            bgcolor: vehicle.type_offer === 'RENTAL' ? 'primary.main' : 'secondary.main',
+                            bgcolor: 'primary.main',
                             color: 'white',
                             fontWeight: 500,
                             '&:hover': {
-                                bgcolor: vehicle.type_offer === 'RENTAL' ? 'primary.dark' : 'secondary.dark'
+                                bgcolor: 'primary.dark'
                             }
                         }}
                         size="small" 

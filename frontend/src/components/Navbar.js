@@ -13,8 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import LogoutIcon from '@mui/icons-material/Logout';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import FolderIcon from '@mui/icons-material/Folder';
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -31,14 +29,12 @@ const Navbar = () => {
         <AppBar 
             position="sticky" 
             sx={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.4)',
-                height: 90,
+                backgroundColor: 'background.paper',
+                height: 70,
                 display: 'flex',
-                justifyContent: 'center'
+                justifyContent: 'center',
             }}
+            elevation={0}
         >
             <Container maxWidth="lg">
                 <Toolbar 
@@ -48,7 +44,6 @@ const Navbar = () => {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        gap: 3
                     }}
                 >
                     <Box 
@@ -56,65 +51,23 @@ const Navbar = () => {
                             display: 'flex', 
                             alignItems: 'center', 
                             cursor: 'pointer',
-                            transition: 'all 0.3s ease-in-out',
-                            padding: '8px 16px',
-                            borderRadius: '16px',
-                            '&:hover': { 
-                                transform: 'scale(1.02)',
-                                backgroundColor: 'rgba(44, 62, 80, 0.04)'
-                            }
+                            gap: 2,
                         }}
                         onClick={() => navigate('/vehicles')}
                     >
-                        <Box
-                            sx={{
-                                backgroundColor: 'primary.main',
-                                borderRadius: '16px',
-                                padding: '12px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: '16px',
-                                boxShadow: '0 4px 12px rgba(44, 62, 80, 0.2)',
-                                transition: 'all 0.3s ease-in-out',
-                                '&:hover': {
-                                    transform: 'rotate(8deg) scale(1.1)',
-                                    boxShadow: '0 6px 16px rgba(44, 62, 80, 0.25)'
-                                }
-                            }}
-                        >
-                            <DirectionsCarIcon 
-                                sx={{ 
-                                    fontSize: 38,
-                                    color: 'white'
-                                }} 
-                            />
-                        </Box>
+                        <DirectionsCarIcon 
+                            sx={{ 
+                                fontSize: 28,
+                                color: 'primary.main'
+                            }} 
+                        />
                         <Typography
-                            variant="h4"
+                            variant="h5"
                             component="div"
                             sx={{ 
-                                fontWeight: 800,
-                                background: 'linear-gradient(45deg, #2C3E50 30%, #3498DB 90%)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                letterSpacing: '1px',
-                                textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
-                                position: 'relative',
-                                '&::after': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    bottom: -4,
-                                    left: 0,
-                                    width: '0%',
-                                    height: '3px',
-                                    background: 'linear-gradient(45deg, #2C3E50 30%, #3498DB 90%)',
-                                    transition: 'width 0.3s ease-in-out',
-                                    borderRadius: '2px'
-                                },
-                                '&:hover::after': {
-                                    width: '100%'
-                                }
+                                fontWeight: 700,
+                                color: 'primary.main',
+                                letterSpacing: '-0.01em',
                             }}
                         >
                             ABD Motors
@@ -125,61 +78,34 @@ const Navbar = () => {
                         sx={{ 
                             display: 'flex', 
                             alignItems: 'center', 
-                            gap: 3,
-                            '& > *': {
-                                transition: 'all 0.3s ease-in-out'
-                            }
+                            gap: 2,
                         }}
                     >
                         <IconButton
                             onClick={() => navigate('/profile')}
                             sx={{
-                                p: 0.5,
-                                borderRadius: '50%',
-                                '&:hover': {
-                                    backgroundColor: 'transparent',
-                                    '& .MuiAvatar-root': {
-                                        transform: 'translateY(-2px) scale(1.05)',
-                                        boxShadow: '0 6px 16px rgba(44, 62, 80, 0.25)',
-                                        bgcolor: 'primary.dark',
-                                    }
-                                }
+                                padding: 0.5,
                             }}
                         >
                             <Avatar 
                                 sx={{ 
-                                    width: 48,
-                                    height: 48,
+                                    width: 40,
+                                    height: 40,
                                     bgcolor: 'primary.main',
-                                    fontWeight: 700,
-                                    fontSize: '1.2rem',
-                                    border: '2px solid white',
-                                    boxShadow: '0 4px 12px rgba(44, 62, 80, 0.2)',
-                                    transition: 'all 0.3s ease-in-out',
+                                    fontWeight: 600,
+                                    fontSize: '1rem',
                                 }}
                             >
                                 {user.first_name?.[0]?.toUpperCase()}
                             </Avatar>
                         </IconButton>
                         <Button 
-                            variant="contained"
-                            color="primary"
+                            variant="outlined"
                             onClick={handleLogout}
                             startIcon={<LogoutIcon />}
                             sx={{ 
-                                borderRadius: '16px',
-                                px: 4,
-                                py: 1.5,
-                                textTransform: 'none',
-                                fontWeight: 600,
-                                fontSize: '1rem',
-                                boxShadow: '0 4px 12px rgba(44, 62, 80, 0.2)',
-                                background: 'linear-gradient(45deg, #2C3E50 30%, #3498DB 90%)',
-                                transition: 'all 0.3s ease-in-out',
-                                '&:hover': {
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: '0 6px 16px rgba(44, 62, 80, 0.25)',
-                                }
+                                borderColor: 'rgba(44, 62, 80, 0.2)',
+                                color: 'text.primary',
                             }}
                         >
                             Déconnexion

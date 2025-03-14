@@ -109,6 +109,9 @@ const VehicleCard = ({ vehicle }) => {
                     onError={(e) => {
                         e.target.src = '/placeholder-car.jpg';
                     }}
+                    sx={{
+                        filter: vehicle.state !== 'AVAILABLE' ? 'brightness(0.9)' : 'none',
+                    }}
                 />
                 <Chip 
                     label={getStatusLabel(vehicle.state)}
@@ -116,8 +119,31 @@ const VehicleCard = ({ vehicle }) => {
                     size="small"
                     sx={{
                         position: 'absolute',
-                        top: 8,
-                        right: 8,
+                        top: 12,
+                        right: 12,
+                        height: '24px',
+                        backgroundColor: theme => {
+                            switch (vehicle.state) {
+                                case 'AVAILABLE':
+                                    return 'rgba(39, 174, 96, 0.9)';
+                                case 'RESERVED':
+                                    return 'rgba(243, 156, 18, 0.9)';
+                                case 'SOLD':
+                                case 'RENTED':
+                                    return 'rgba(231, 76, 60, 0.9)';
+                                default:
+                                    return 'rgba(127, 140, 141, 0.9)';
+                            }
+                        },
+                        color: '#FFFFFF',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                        letterSpacing: '0.02em',
+                        backdropFilter: 'blur(4px)',
+                        border: 'none',
+                        '& .MuiChip-label': {
+                            padding: '0 8px',
+                        }
                     }}
                 />
             </Box>

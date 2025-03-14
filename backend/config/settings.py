@@ -57,7 +57,7 @@ DATABASES = {
 }
 
 # Lightsail Configuration
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ['*']  # Accepte toutes les connexions entrantes
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition

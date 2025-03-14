@@ -1,7 +1,11 @@
 import api from './api';
 
 export const getVehicles = async () => {
-    const { data } = await api.get('/vehicles/');
+    const { data } = await api.get('/vehicles/', {
+        params: {
+            ordering: '-year'
+        }
+    });
     return data;
 };
 
@@ -13,7 +17,7 @@ export const getVehicleById = async (id) => {
 export const getAdjacentVehicles = async (currentId) => {
     const { data: vehicles } = await api.get('/vehicles/', {
         params: {
-            ordering: '-date_added'
+            ordering: '-year'
         }
     });
     

@@ -183,78 +183,78 @@ const VehicleDetail = () => {
             
             {/* Navigation Arrows */}
             <Box>
-                {adjacentVehicles.previous && (
-                    <IconButton
-                        sx={{
-                            position: 'fixed',
-                            left: { xs: 16, md: '5%' },
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            zIndex: 10,
+                <IconButton
+                    sx={{
+                        position: 'fixed',
+                        left: { xs: 20, md: 40 },
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        zIndex: 10,
+                        bgcolor: 'rgba(255, 255, 255, 0.9)',
+                        backdropFilter: 'blur(8px)',
+                        width: { xs: 48, md: 64 },
+                        height: { xs: 48, md: 64 },
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        opacity: adjacentVehicles.previous ? 1 : 0.5,
+                        pointerEvents: adjacentVehicles.previous ? 'auto' : 'none',
+                        '&:hover': {
                             bgcolor: 'background.paper',
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-                            width: { xs: 40, md: 56 },
-                            height: { xs: 40, md: 56 },
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            '&:hover': {
-                                bgcolor: 'background.paper',
-                                transform: 'translateY(-50%) scale(1.05)',
-                                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                                '& .MuiSvgIcon-root': {
-                                    transform: 'translateX(-2px)',
-                                    color: 'primary.main',
-                                }
-                            },
+                            transform: adjacentVehicles.previous ? 'translateY(-50%) scale(1.1)' : 'translateY(-50%)',
+                            boxShadow: adjacentVehicles.previous ? '0 8px 24px rgba(0,0,0,0.15)' : 'none',
+                            '& .MuiSvgIcon-root': {
+                                transform: adjacentVehicles.previous ? 'translateX(-4px)' : 'none',
+                                color: adjacentVehicles.previous ? 'primary.main' : 'text.disabled',
+                            }
+                        },
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                    onClick={() => adjacentVehicles.previous && handleNavigate(adjacentVehicles.previous)}
+                >
+                    <ArrowBackIosNewIcon 
+                        sx={{ 
+                            fontSize: { xs: 24, md: 28 },
                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        }}
-                        onClick={() => handleNavigate(adjacentVehicles.previous)}
-                    >
-                        <ArrowBackIosNewIcon 
-                            sx={{ 
-                                fontSize: { xs: 20, md: 24 },
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                color: 'text.primary',
-                            }} 
-                        />
-                    </IconButton>
-                )}
-                {adjacentVehicles.next && (
-                    <IconButton
-                        sx={{
-                            position: 'fixed',
-                            right: { xs: 16, md: '5%' },
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            zIndex: 10,
+                            color: adjacentVehicles.previous ? 'text.primary' : 'text.disabled',
+                        }} 
+                    />
+                </IconButton>
+                <IconButton
+                    sx={{
+                        position: 'fixed',
+                        right: { xs: 20, md: 40 },
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        zIndex: 10,
+                        bgcolor: 'rgba(255, 255, 255, 0.9)',
+                        backdropFilter: 'blur(8px)',
+                        width: { xs: 48, md: 64 },
+                        height: { xs: 48, md: 64 },
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        opacity: adjacentVehicles.next ? 1 : 0.5,
+                        pointerEvents: adjacentVehicles.next ? 'auto' : 'none',
+                        '&:hover': {
                             bgcolor: 'background.paper',
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-                            width: { xs: 40, md: 56 },
-                            height: { xs: 40, md: 56 },
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            '&:hover': {
-                                bgcolor: 'background.paper',
-                                transform: 'translateY(-50%) scale(1.05)',
-                                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                                '& .MuiSvgIcon-root': {
-                                    transform: 'translateX(2px)',
-                                    color: 'primary.main',
-                                }
-                            },
+                            transform: adjacentVehicles.next ? 'translateY(-50%) scale(1.1)' : 'translateY(-50%)',
+                            boxShadow: adjacentVehicles.next ? '0 8px 24px rgba(0,0,0,0.15)' : 'none',
+                            '& .MuiSvgIcon-root': {
+                                transform: adjacentVehicles.next ? 'translateX(4px)' : 'none',
+                                color: adjacentVehicles.next ? 'primary.main' : 'text.disabled',
+                            }
+                        },
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                    onClick={() => adjacentVehicles.next && handleNavigate(adjacentVehicles.next)}
+                >
+                    <ArrowForwardIosIcon 
+                        sx={{ 
+                            fontSize: { xs: 24, md: 28 },
                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        }}
-                        onClick={() => handleNavigate(adjacentVehicles.next)}
-                    >
-                        <ArrowForwardIosIcon 
-                            sx={{ 
-                                fontSize: { xs: 20, md: 24 },
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                color: 'text.primary',
-                            }} 
-                        />
-                    </IconButton>
-                )}
+                            color: adjacentVehicles.next ? 'text.primary' : 'text.disabled',
+                        }} 
+                    />
+                </IconButton>
             </Box>
 
             <Paper 
@@ -262,31 +262,39 @@ const VehicleDetail = () => {
                     position: 'relative',
                     overflow: 'hidden',
                     bgcolor: 'background.paper',
-                    borderRadius: 3,
-                    boxShadow: '0 10px 40px -10px rgba(0,0,0,0.1)',
+                    borderRadius: 4,
+                    boxShadow: '0 12px 48px rgba(0,0,0,0.08)',
+                    transition: 'all 0.3s ease-in-out',
+                    '&:hover': {
+                        boxShadow: '0 16px 56px rgba(0,0,0,0.12)',
+                    }
                 }}
                 elevation={0}
             >
                 <Button
-                    variant="outlined"
+                    variant="contained"
                     sx={{ 
                         position: 'absolute',
                         top: 24,
                         left: 24,
                         zIndex: 2,
-                        bgcolor: 'rgba(255, 255, 255, 0.95)',
+                        bgcolor: 'rgba(255, 255, 255, 0.9)',
+                        color: 'text.primary',
                         backdropFilter: 'blur(8px)',
-                        borderRadius: '12px',
+                        borderRadius: '16px',
                         px: 3,
+                        py: 1.2,
+                        fontWeight: 600,
                         '&:hover': {
-                            bgcolor: 'rgba(255, 255, 255, 1)',
-                            transform: 'translateY(-1px)',
+                            bgcolor: 'background.paper',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                         },
                         transition: 'all 0.2s ease-in-out'
                     }}
                     onClick={() => navigate('/vehicles')}
                 >
-                    Retour
+                    ← Retour
                 </Button>
 
                 <Grid container>
@@ -305,8 +313,8 @@ const VehicleDetail = () => {
                                     width: '100%',
                                     height: '100%',
                                     objectFit: 'cover',
-                                    filter: vehicle.state !== 'AVAILABLE' ? 'brightness(0.9)' : 'none',
-                                    transition: 'transform 0.3s ease-in-out',
+                                    filter: vehicle.state !== 'AVAILABLE' ? 'brightness(0.8)' : 'none',
+                                    transition: 'all 0.5s ease-in-out',
                                 }}
                                 onError={(e) => {
                                     e.target.src = '/images/placeholder-car.jpg';
@@ -319,7 +327,8 @@ const VehicleDetail = () => {
                                     left: 0,
                                     right: 0,
                                     bottom: 0,
-                                    background: 'linear-gradient(to bottom, rgba(0,0,0,0) 70%, rgba(0,0,0,0.4))',
+                                    background: 'linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.5))',
+                                    opacity: 0.8,
                                 }}
                             />
                             <Chip 
@@ -328,7 +337,7 @@ const VehicleDetail = () => {
                                     position: 'absolute',
                                     top: 24,
                                     right: 24,
-                                    height: '32px',
+                                    height: '36px',
                                     backgroundColor: theme => {
                                         switch (vehicle.state) {
                                             case 'AVAILABLE':
@@ -344,13 +353,18 @@ const VehicleDetail = () => {
                                     },
                                     color: '#FFFFFF',
                                     fontWeight: 600,
-                                    fontSize: '0.875rem',
+                                    fontSize: '0.95rem',
                                     letterSpacing: '0.02em',
                                     backdropFilter: 'blur(8px)',
                                     border: 'none',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                                     '& .MuiChip-label': {
                                         padding: '0 16px',
+                                    },
+                                    transition: 'all 0.3s ease-in-out',
+                                    '&:hover': {
+                                        transform: 'translateY(-1px)',
+                                        boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
                                     }
                                 }}
                             />
@@ -359,21 +373,23 @@ const VehicleDetail = () => {
                     <Grid item xs={12} md={5}>
                         <Box 
                             sx={{ 
-                                p: { xs: 3, md: 5 },
+                                p: { xs: 3, md: 6 },
                                 height: '100%',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 position: 'relative',
+                                bgcolor: 'background.paper',
                             }}
                         >
                             <Typography 
                                 variant="h3" 
                                 sx={{ 
-                                    fontWeight: 700,
+                                    fontWeight: 800,
                                     color: 'text.primary',
-                                    mb: 1,
-                                    fontSize: { xs: '2rem', md: '2.5rem' },
-                                    lineHeight: 1.2
+                                    mb: 2,
+                                    fontSize: { xs: '2.2rem', md: '2.8rem' },
+                                    lineHeight: 1.2,
+                                    letterSpacing: '-0.02em',
                                 }}
                             >
                                 {vehicle.brand} {vehicle.model}
@@ -381,18 +397,18 @@ const VehicleDetail = () => {
                             
                             {getPriceDisplay()}
                             
-                            <Divider sx={{ my: 4 }} />
+                            <Divider sx={{ my: 4, opacity: 0.6 }} />
                             
-                            <Grid container spacing={4}>
+                            <Grid container spacing={4} sx={{ mb: 4 }}>
                                 <Grid item xs={6}>
                                     <Typography 
                                         variant="subtitle2" 
                                         color="text.secondary" 
-                                        sx={{ mb: 1, fontSize: '0.875rem' }}
+                                        sx={{ mb: 1, fontSize: '0.95rem', fontWeight: 500 }}
                                     >
                                         Année
                                     </Typography>
-                                    <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                                    <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '1.5rem' }}>
                                         {vehicle.year}
                                     </Typography>
                                 </Grid>
@@ -400,23 +416,23 @@ const VehicleDetail = () => {
                                     <Typography 
                                         variant="subtitle2" 
                                         color="text.secondary" 
-                                        sx={{ mb: 1, fontSize: '0.875rem' }}
+                                        sx={{ mb: 1, fontSize: '0.95rem', fontWeight: 500 }}
                                     >
                                         Kilométrage
                                     </Typography>
-                                    <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                                        {vehicle.mileage} km
+                                    <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '1.5rem' }}>
+                                        {vehicle.mileage.toLocaleString()} km
                                     </Typography>
                                 </Grid>
                             </Grid>
 
                             <Stack 
                                 direction="row" 
-                                spacing={1.5} 
+                                spacing={2} 
                                 sx={{ 
-                                    mt: 4,
                                     flexWrap: 'wrap',
-                                    gap: 1.5
+                                    gap: 2,
+                                    mb: 4
                                 }}
                             >
                                 <Chip 
@@ -425,10 +441,15 @@ const VehicleDetail = () => {
                                         bgcolor: 'primary.main',
                                         color: 'white',
                                         fontWeight: 600,
-                                        fontSize: '0.875rem',
-                                        height: '32px',
+                                        fontSize: '0.95rem',
+                                        height: '36px',
+                                        borderRadius: '12px',
                                         '& .MuiChip-label': {
-                                            px: 2
+                                            px: 2.5
+                                        },
+                                        transition: 'all 0.2s ease-in-out',
+                                        '&:hover': {
+                                            transform: 'translateY(-1px)',
                                         }
                                     }}
                                 />
@@ -439,10 +460,16 @@ const VehicleDetail = () => {
                                             bgcolor: 'rgba(39, 174, 96, 0.1)',
                                             color: 'success.dark',
                                             fontWeight: 600,
-                                            fontSize: '0.875rem',
-                                            height: '32px',
+                                            fontSize: '0.95rem',
+                                            height: '36px',
+                                            borderRadius: '12px',
                                             '& .MuiChip-label': {
-                                                px: 2
+                                                px: 2.5
+                                            },
+                                            transition: 'all 0.2s ease-in-out',
+                                            '&:hover': {
+                                                transform: 'translateY(-1px)',
+                                                bgcolor: 'rgba(39, 174, 96, 0.15)',
                                             }
                                         }}
                                     />
@@ -454,23 +481,29 @@ const VehicleDetail = () => {
                                             bgcolor: 'rgba(39, 174, 96, 0.1)',
                                             color: 'success.dark',
                                             fontWeight: 600,
-                                            fontSize: '0.875rem',
-                                            height: '32px',
+                                            fontSize: '0.95rem',
+                                            height: '36px',
+                                            borderRadius: '12px',
                                             '& .MuiChip-label': {
-                                                px: 2
+                                                px: 2.5
+                                            },
+                                            transition: 'all 0.2s ease-in-out',
+                                            '&:hover': {
+                                                transform: 'translateY(-1px)',
+                                                bgcolor: 'rgba(39, 174, 96, 0.15)',
                                             }
                                         }}
                                     />
                                 )}
                             </Stack>
 
-                            <Box sx={{ mt: 4 }}>
+                            <Box sx={{ mb: 6 }}>
                                 <Typography 
-                                    variant="subtitle2" 
-                                    color="text.secondary" 
+                                    variant="h6" 
                                     sx={{ 
                                         mb: 2,
-                                        fontSize: '0.875rem'
+                                        fontWeight: 600,
+                                        color: 'text.primary',
                                     }}
                                 >
                                     Description
@@ -478,10 +511,10 @@ const VehicleDetail = () => {
                                 <Typography 
                                     variant="body1" 
                                     sx={{ 
-                                        color: 'text.primary',
+                                        color: 'text.secondary',
                                         lineHeight: 1.8,
-                                        fontSize: '1rem',
-                                        opacity: 0.9
+                                        fontSize: '1.05rem',
+                                        letterSpacing: '0.01em',
                                     }}
                                 >
                                     {vehicle.description || "Aucune description disponible"}
@@ -490,12 +523,14 @@ const VehicleDetail = () => {
                             
                             <Box 
                                 sx={{ 
-                                    mt: 'auto', 
-                                    pt: 5,
+                                    mt: 'auto',
+                                    pt: 4,
                                     position: 'sticky',
                                     bottom: 0,
                                     bgcolor: 'background.paper',
-                                    zIndex: 1
+                                    borderTop: '1px solid',
+                                    borderColor: 'divider',
+                                    zIndex: 1,
                                 }}
                             >
                                 {getActionButton()}

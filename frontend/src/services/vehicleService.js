@@ -11,7 +11,12 @@ export const getVehicleById = async (id) => {
 };
 
 export const getAdjacentVehicles = async (currentId) => {
-    const { data: vehicles } = await api.get('/vehicles/');
+    const { data: vehicles } = await api.get('/vehicles/', {
+        params: {
+            ordering: '-date_added'
+        }
+    });
+    
     const currentIndex = vehicles.findIndex(v => v.id === parseInt(currentId));
     
     return {

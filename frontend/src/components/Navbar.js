@@ -52,22 +52,36 @@ const Navbar = () => {
                             alignItems: 'center', 
                             cursor: 'pointer',
                             gap: 2,
+                            '&:hover': {
+                                '& .car-icon': {
+                                    transform: 'scale(1.1) rotate(-5deg)',
+                                    color: 'primary.dark',
+                                },
+                                '& .logo-text': {
+                                    transform: 'translateX(4px)',
+                                    color: 'primary.dark',
+                                }
+                            }
                         }}
                         onClick={() => navigate('/vehicles')}
                     >
                         <DirectionsCarIcon 
                             sx={{ 
                                 fontSize: 28,
-                                color: 'primary.main'
-                            }} 
+                                color: 'primary.main',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            }}
+                            className="car-icon"
                         />
                         <Typography
                             variant="h5"
                             component="div"
+                            className="logo-text"
                             sx={{ 
                                 fontWeight: 700,
                                 color: 'primary.main',
                                 letterSpacing: '-0.01em',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                             }}
                         >
                             ABD Motors

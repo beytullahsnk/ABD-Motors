@@ -13,6 +13,7 @@ API REST Django pour la gestion de véhicules et de dossiers de location/vente.
 - Swagger/OpenAPI pour la documentation
 - Gunicorn pour le serveur WSGI
 - NGINX pour le serveur proxy
+- Ollama (llama2) pour l'IA générative
 
 ## 📋 Prérequis
 
@@ -21,6 +22,7 @@ API REST Django pour la gestion de véhicules et de dossiers de location/vente.
 - Compte AWS (S3 et RDS)
 - pip ou poetry
 - Virtualenv
+- Ollama installé (pour GenIA)
 
 ## ⚙️ Installation
 
@@ -37,7 +39,19 @@ venv\Scripts\activate  # Sur Windows
 pip install -r requirements.txt
 ```
 
-3. **Configurez les variables d'environnement** :
+3. **Installation d'Ollama** (pour GenIA) :
+```bash
+# Sur Linux/macOS
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Vérifiez l'installation
+ollama --version
+
+# Téléchargez le modèle llama2
+ollama pull llama2
+```
+
+4. **Configurez les variables d'environnement** :
 Créez un fichier `.env` à la racine du dossier backend :
 ```env
 # Django
@@ -62,7 +76,7 @@ AWS_S3_REGION_NAME=eu-west-3
 ALLOWED_HOSTS=localhost,127.0.0.1
 ```
 
-4. **Appliquez les migrations** :
+5. **Appliquez les migrations** :
 ```bash
 python manage.py migrate
 python manage.py createsuperuser
@@ -75,7 +89,12 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-2. **Accédez aux interfaces** :
+2. **Démarrez Ollama** (dans un autre terminal) :
+```bash
+ollama serve
+```
+
+3. **Accédez aux interfaces** :
 - Admin : http://localhost:8000/admin/
 - API : http://localhost:8000/api/
 - Documentation API : http://localhost:8000/api/docs/
@@ -88,6 +107,7 @@ backend/
 ├── user/              # Application gestion utilisateurs
 ├── vehicle/           # Application gestion véhicules
 ├── folder/            # Application gestion dossiers
+├── genia/             # Application IA générative
 ├── utils/             # Utilitaires partagés
 ├── manage.py          # Script de gestion Django
 └── requirements.txt   # Dépendances du projet
@@ -116,6 +136,49 @@ backend/
 - PUT `/api/folders/{id}/` - Modifier un dossier
 - DELETE `/api/folders/{id}/` - Supprimer un dossier
 - POST `/api/folders/{id}/files/` - Ajouter des fichiers
+
+### GenIA (IA Générative)
+- GET `/api/genia/documents/` - Liste des documents
+- POST `/api/genia/documents/` - Uploader un document
+- GET `/api/genia/documents/{id}/` - Détails d'un document
+- POST `/api/genia/interactions/ask/` - Interroger l'IA sur des documents
+- GET `/api/genia/interactions/` - Historique des interactions
+- GET `/api/genia/documents/list_s3_documents/` - Liste des documents S3
+- POST `/api/genia/documents/import_from_s3/` - Importer un document depuis S3
+
+## 📘 Module GenIA
+
+Le module GenIA intègre l'IA générative (via Ollama) pour l'analyse de documents. Il offre les fonctionnalités suivantes :
+
+### Modèles de données
+- **Document** : Stocke les métadonnées et contenu des documents (PDF)
+- **AIInteraction** : Enregistre les interactions entre utilisateurs et l'IA
+
+### Fonctionnement
+1. **Upload de documents** : 
+   - Les documents PDF sont chargés via l'API
+   - S'ils sont stockés sur S3, une clé S3 est enregistrée
+   - PyPDF2 extrait automatiquement le texte des PDF
+
+2. **Interrogation d'Ollama** :
+   - Le texte extrait des documents est envoyé comme contexte à Ollama
+   - Les questions utilisateur sont traitées par le modèle llama2
+   - Les réponses sont renvoyées à l'utilisateur et sauvegardées
+
+3. **Intégration S3** :
+   - Liste des documents du bucket S3
+   - Import direct de documents depuis S3 vers la base de données
+   - Gestion transparente du stockage local ou cloud
+
+### Configuration d'Ollama
+- GenIA communique avec Ollama via son API REST sur `http://localhost:11434/`
+- Le modèle par défaut est `llama2`
+- En production, Ollama est géré par un service systemd configuré par `deploy.sh`
+
+### Extraction de texte
+- Utilise PyPDF2 pour extraire le texte des documents PDF
+- Gère le téléchargement temporaire des fichiers depuis S3
+- Structure le texte page par page pour une meilleure analyse
 
 ## 💾 Gestion du stockage
 
@@ -184,6 +247,19 @@ server {
     }
 }
 ```
+
+4. **Configuration d'Ollama pour la production** :
+```bash
+# Démarrer Ollama comme service
+sudo systemctl start ollama
+sudo systemctl enable ollama
+
+# Vérifier que le modèle llama2 est disponible
+ollama list
+```
+
+5. **Utilisation du script de déploiement**
+Le projet fournit un fichier `deploy.sh` à la racine qui automatise ces étapes pour un déploiement sur AWS Lightsail.
 
 ## 🔒 Sécurité
 

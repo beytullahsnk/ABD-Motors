@@ -78,12 +78,56 @@ frontend/
 - `Profile` : Gestion du profil utilisateur
 - `FolderCreation` : Création de dossier
 - `PurchaseCreation` : Création de dossier d'achat
+- `GeniaPage` : Interface d'IA générative pour l'analyse de documents
 
 ### Composants
 - `Navbar` : Navigation principale
 - `VehicleCard` : Carte de présentation véhicule
 - `ErrorAlert` : Affichage des erreurs
 - `LoadingScreen` : Écran de chargement
+
+## 🧠 Interface GenIA
+
+L'interface GenIA est une fonctionnalité avancée permettant aux représentants commerciaux d'interroger des documents en langage naturel via une IA générative.
+
+### Fonctionnalités
+- Interface utilisateur intuitive pour uploader des documents
+- Importation directe depuis AWS S3
+- Formulaire de questions en langage naturel
+- Affichage des réponses générées par l'IA
+- Gestion des fichiers PDF (contrats, dossiers de vente/location)
+
+### Implémentation technique
+- Composant React dédié (`GeniaPage.jsx`)
+- Utilisation des hooks React pour la gestion d'état
+- Communication avec l'API backend via Axios
+- Upload de fichiers avec FormData
+- Authentification JWT pour sécuriser les requêtes
+
+### Guide d'utilisation
+1. **Upload de document** :
+   - Cliquez sur "Choisir un fichier PDF"
+   - Sélectionnez votre document
+   - Cliquez sur "Uploader le document"
+   
+2. **Import depuis S3** :
+   - Cliquez sur "Importer depuis S3"
+   - Sélectionnez un document dans la liste
+   - Cliquez sur "Importer"
+
+3. **Interrogation de l'IA** :
+   - Entrez votre question dans le champ de texte
+   - Cliquez sur "Envoyer la question"
+   - La réponse de l'IA s'affiche en dessous
+
+### Flux de données
+1. L'utilisateur upload un document PDF
+2. Le backend extrait le texte et le stocke
+3. L'utilisateur pose une question
+4. Le backend envoie la question et le contexte à Ollama
+5. La réponse est renvoyée et affichée à l'utilisateur
+
+Cette interface simplifie considérablement l'analyse des documents contractuels, permettant aux commerciaux d'extraire rapidement des informations spécifiques sans avoir à parcourir l'intégralité des documents.
 
 ## 🎨 Styles et thème
 
@@ -124,6 +168,13 @@ const theme = {
 - `createFolder(data)`
 - `getUserFolders()`
 - `updateFolder(id, data)`
+
+### geniaService
+- `uploadDocument(formData)`
+- `getDocuments()`
+- `askQuestion(query, documentIds)`
+- `listS3Documents()`
+- `importFromS3(key, title, documentType)`
 
 ## 🧪 Tests
 

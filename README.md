@@ -15,6 +15,32 @@ ABD-Motors est une application full-stack permettant de gérer un parc de véhic
 - Authentification et gestion des rôles
 - Upload et stockage de documents sur AWS S3
 - Interface responsive et moderne
+- **GenIA** : Interface d'IA générative pour interroger les documents
+
+## 🧠 GenIA - Interface d'IA pour l'analyse de documents
+
+GenIA est une fonctionnalité intégrée permettant aux représentants commerciaux d'interroger des documents PDF (contrats de location, dossiers de vente) en langage naturel.
+
+### Fonctionnalités
+- Upload de documents PDF (stockés sur AWS S3)
+- Extraction automatique du texte des documents
+- Importation directe depuis le bucket S3
+- Interface conversationnelle avec l'IA
+- Réponses contextuelles basées sur le contenu des documents
+
+### Technologies
+- Ollama (modèle llama2) pour le traitement du langage naturel
+- AWS S3 pour le stockage des documents
+- PyPDF2 pour l'extraction de texte
+- React pour l'interface utilisateur
+
+### Utilisation
+1. Accédez à la page GenIA depuis le menu
+2. Uploadez un document PDF ou importez-le depuis S3
+3. Posez une question en langage naturel concernant le document
+4. Recevez une réponse générée par l'IA, basée sur le contenu du document
+
+Cet outil permet aux commerciaux de rapidement extraire des informations pertinentes des documents sans avoir à les lire intégralement, améliorant ainsi l'efficacité et la qualité du service client.
 
 ## 🏗️ Architecture
 
@@ -44,6 +70,7 @@ Le projet est divisé en deux parties principales :
 - PostgreSQL
 - JWT Authentication
 - AWS S3 pour le stockage
+- Ollama pour l'IA générative
 
 ### Infrastructure
 - AWS RDS pour la base de données
@@ -56,6 +83,7 @@ Le projet est divisé en deux parties principales :
 - Node.js 16+
 - PostgreSQL
 - Compte AWS (S3 et RDS)
+- Ollama (pour la fonctionnalité GenIA)
 
 ## 🔧 Installation rapide
 
@@ -89,10 +117,23 @@ Pour des instructions d'installation détaillées, consultez les README respecti
 1. Configurez les variables d'environnement (voir `.env.example`)
 2. Assurez-vous que PostgreSQL est en cours d'exécution
 3. Configurez vos credentials AWS
+4. Installez et démarrez Ollama pour la fonctionnalité GenIA
 
 ## 🚀 Déploiement
 
-Le projet est configuré pour être déployé sur AWS Lightsail. Consultez le guide de déploiement dans la documentation du backend pour plus de détails.
+Le projet est configuré pour être déployé sur AWS Lightsail. Un script de déploiement automatisé (`deploy.sh`) est fourni et configure:
+- L'environnement Python et npm
+- NGINX et Gunicorn
+- Ollama avec le modèle llama2
+- Des services systemd pour assurer que tous les composants démarrent automatiquement
+
+Pour déployer:
+```bash
+# Sur votre instance Lightsail
+cd ABD-Motors
+chmod +x deploy.sh
+sudo ./deploy.sh
+```
 
 ## 👥 Équipe
 

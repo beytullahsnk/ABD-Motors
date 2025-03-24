@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Variables
-BACKEND_DIR="/home/ubuntu/backend"
-FRONTEND_DIR="/home/ubuntu/frontend"
+BACKEND_DIR="/home/ubuntu/ABDmotors/backend"
+FRONTEND_DIR="/home/ubuntu/ABDmotors/frontend"
 
 # Installation des dépendances système
 echo "Installation des dépendances système..."

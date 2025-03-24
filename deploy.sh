@@ -9,6 +9,15 @@ echo "Installation des dépendances système..."
 sudo apt-get update
 sudo apt-get install -y python3-pip python3-venv nginx postgresql-client nodejs npm
 
+# Installation d'Ollama pour GenIA
+echo "Installation d'Ollama pour l'API GenIA..."
+curl -fsSL https://ollama.com/install.sh | sudo sh
+# Démarrage d'Ollama
+ollama serve > /home/ubuntu/ollama.log 2>&1 &
+# Téléchargement du modèle llama2 pour Ollama
+echo "Téléchargement du modèle llama2..."
+ollama pull llama2
+
 # Configuration de l'environnement Python pour le backend
 echo "Configuration de l'environnement Python..."
 cd $BACKEND_DIR
@@ -79,16 +88,39 @@ ExecStart=/home/ubuntu/backend/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:80
 WantedBy=multi-user.target
 EOL'
 
+# Configuration du service Ollama pour le démarrage automatique
+echo "Configuration du service Ollama..."
+sudo bash -c 'cat > /etc/systemd/system/ollama.service << EOL
+[Unit]
+Description=Ollama AI Service
+After=network.target
+
+[Service]
+User=ubuntu
+ExecStart=/usr/local/bin/ollama serve
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOL'
+
 # Démarrage des services
 echo "Démarrage des services..."
 sudo systemctl daemon-reload
 sudo systemctl enable gunicorn
 sudo systemctl restart gunicorn
+sudo systemctl enable ollama
+sudo systemctl restart ollama
 
 # Migrations Django
 echo "Application des migrations Django..."
 cd $BACKEND_DIR
 source venv/bin/activate
 python manage.py migrate
+
+# Vérification du fonctionnement d'Ollama
+echo "Vérification d'Ollama..."
+curl -s http://localhost:11434/api/tags || echo "ATTENTION: Ollama n'est pas accessible. Vérifiez son état avec 'sudo systemctl status ollama'"
 
 echo "Déploiement terminé !" 

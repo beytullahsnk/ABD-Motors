@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'user.apps.UserConfig',
     'vehicle.apps.VehicleConfig',
     'folder.apps.FolderConfig',
+    'genia.apps.GeniaConfig',
 ]
 
 REST_FRAMEWORK = {

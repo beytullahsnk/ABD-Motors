@@ -20,6 +20,7 @@ import VehicleDetail from './pages/VehicleDetail';
 import FolderCreation from './pages/FolderCreation';
 import PurchaseCreation from './pages/PurchaseCreation';
 import Profile from './pages/Profile';
+import GeniaPage from './pages/GeniaPage';
 
 // Theme
 import theme from './theme';
@@ -101,6 +102,14 @@ const App = () => {
                                 element={
                                     <PrivateRoute>
                                         <Profile />
+                                    </PrivateRoute>
+                                }
+                            />
+                            <Route
+                                path="/genia"
+                                element={
+                                    <PrivateRoute>
+                                        <GeniaPage />
                                     </PrivateRoute>
                                 }
                             />

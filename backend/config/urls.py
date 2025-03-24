@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/auth/', include('user.urls')),
     path('api/vehicles/', include('vehicle.urls')),
     path('api/folders/', include('folder.urls')),
+    path('api/genia/', include('genia.urls')),
     # path('health/', MainView.as_view(), name='health_check'),  # Pour Lightsail
     # Rediriger la racine vers l'admin
     path('', RedirectView.as_view(url='/admin/', permanent=True)),

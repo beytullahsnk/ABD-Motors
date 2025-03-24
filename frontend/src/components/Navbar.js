@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import LogoutIcon from '@mui/icons-material/Logout';
+import PsychologyIcon from '@mui/icons-material/Psychology';
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -95,6 +96,18 @@ const Navbar = () => {
                             gap: 2,
                         }}
                     >
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => navigate('/genia')}
+                            startIcon={<PsychologyIcon />}
+                            sx={{ 
+                                mr: 1,
+                                borderRadius: 2
+                            }}
+                        >
+                            GenIA
+                        </Button>
                         <IconButton
                             onClick={() => navigate('/profile')}
                             sx={{

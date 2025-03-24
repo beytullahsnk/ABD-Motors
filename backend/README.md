@@ -146,7 +146,7 @@ backend/
 - GET `/api/genia/documents/list_s3_documents/` - Liste des documents S3
 - POST `/api/genia/documents/import_from_s3/` - Importer un document depuis S3
 
-## 📘 Module GenIA
+## 🧠 Module GenIA
 
 Le module GenIA intègre l'IA générative (via Ollama) pour l'analyse de documents. Il offre les fonctionnalités suivantes :
 

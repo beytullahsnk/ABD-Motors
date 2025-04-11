@@ -110,6 +110,7 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
+    "http://13.36.169.214",
     "https://abdmotors-groupe9.com",
     "https://*.amazonaws.com",
 ]

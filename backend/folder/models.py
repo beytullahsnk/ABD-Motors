@@ -61,6 +61,7 @@ class File(models.Model):
     verification_notes = models.TextField(blank=True, null=True)
 
     class Meta:
+        db_table = 'files'
         ordering = ['-uploaded_at']
 
     def __str__(self):

@@ -4,13 +4,15 @@ from django.conf import settings
 
 class VehicleSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
+    is_available = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Vehicle
         fields = ['id', 'brand', 'model', 'year', 'mileage', 'sale_price', 
                  'rental_price', 'type_offer', 'state', 'description', 'image', 
-                 'image_url', 'has_insurance', 'has_maintenance', 'date_added']
-        read_only_fields = ('owner', 'renter')
+                 'image_url', 'has_insurance', 'has_maintenance', 'date_added',
+                 'is_available']
+        read_only_fields = ('owner', 'renter', 'is_available')
 
     def get_image_url(self, obj):
         if obj.image:
@@ -32,11 +34,17 @@ class VehicleSerializer(serializers.ModelSerializer):
 
 class VehicleDetailSerializer(VehicleSerializer):
     """Serializer pour les détails d'un véhicule."""
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
     
     class Meta(VehicleSerializer.Meta):
         fields = VehicleSerializer.Meta.fields + [
             'owner', 'renter', 'rental_start_date', 'rental_end_date',
-            'is_available', 'has_technical_control', 'has_assistance',
-            'created_at', 'updated_at'
+            'has_technical_control', 'has_assistance',
+            'created_at', 'updated_at',
+            'engine_size', 'fuel_type', 'maintenance_book', 'power', 
+            'technical_control', 'transmission'
         ]
-        read_only_fields = ('owner', 'renter') 
+        read_only_fields = VehicleSerializer.Meta.read_only_fields + (
+            'created_at', 'updated_at'
+        ) 

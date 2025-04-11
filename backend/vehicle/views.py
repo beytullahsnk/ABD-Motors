@@ -22,6 +22,13 @@ class VehicleFilter(django_filters.FilterSet):
     max_year = django_filters.NumberFilter(field_name='year', lookup_expr='lte')
     min_mileage = django_filters.NumberFilter(field_name='mileage', lookup_expr='gte')
     max_mileage = django_filters.NumberFilter(field_name='mileage', lookup_expr='lte')
+    is_available = django_filters.BooleanFilter(method='filter_is_available')
+
+    def filter_is_available(self, queryset, name, value):
+        if value:
+            return queryset.filter(state='AVAILABLE')
+        else:
+            return queryset.exclude(state='AVAILABLE')
 
     class Meta:
         model = Vehicle
@@ -30,7 +37,6 @@ class VehicleFilter(django_filters.FilterSet):
             'model': ['exact', 'icontains'],
             'type_offer': ['exact'],
             'state': ['exact'],
-            'is_available': ['exact'],
             'year': ['exact'],
             'mileage': ['exact'],
         }

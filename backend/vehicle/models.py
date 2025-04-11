@@ -52,11 +52,18 @@ class Vehicle(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
     
     # Statut et vérifications
-    is_available = models.BooleanField(default=True)
     has_insurance = models.BooleanField(default=True)
     has_technical_control = models.BooleanField(default=True)
     has_maintenance = models.BooleanField(default=True)
     has_assistance = models.BooleanField(default=True)
+    
+    # Caractéristiques techniques
+    engine_size = models.CharField(max_length=50, null=True, blank=True)
+    fuel_type = models.CharField(max_length=20, choices=FUEL_TYPES, null=True, blank=True)
+    maintenance_book = models.BooleanField(default=False, null=True, blank=True)
+    power = models.IntegerField(null=True, blank=True)
+    technical_control = models.DateField(null=True, blank=True)
+    transmission = models.CharField(max_length=20, choices=TRANSMISSION_TYPES, null=True, blank=True)
     
     # Relations
     owner = models.ForeignKey(
@@ -75,14 +82,36 @@ class Vehicle(models.Model):
     rental_start_date = models.DateField(null=True, blank=True)
     rental_end_date = models.DateField(null=True, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     class Meta:
-        ordering = ['-created_at']
+        db_table = 'vehicles'
+        ordering = ['-date_added']
 
     def __str__(self):
         return f"{self.brand} {self.model} ({self.type_offer})"
+
+    # Propriété calculée pour la compatibilité avec le frontend
+    @property
+    def is_available(self):
+        """
+        Retourne True si le véhicule est disponible (state = 'AVAILABLE'), False sinon.
+        Cette propriété est utilisée par le frontend mais n'est pas stockée dans la base de données.
+        """
+        return self.state == 'AVAILABLE'
+    
+    # Propriétés calculées pour la compatibilité avec les anciens sérialiseurs
+    @property
+    def created_at(self):
+        """
+        Retourne date_added pour assurer la compatibilité avec les anciens sérialiseurs.
+        """
+        return self.date_added
+    
+    @property
+    def updated_at(self):
+        """
+        Retourne date_added pour assurer la compatibilité avec les anciens sérialiseurs.
+        """
+        return self.date_added
 
     def save(self, *args, **kwargs):
         # Log avant la sauvegarde

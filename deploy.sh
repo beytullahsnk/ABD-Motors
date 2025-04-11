@@ -180,8 +180,21 @@ sudo systemctl restart ollama
 echo "Application des migrations Django..."
 cd $BACKEND_DIR
 source venv/bin/activate
-# Essayer d'abord une fusion si nécessaire
-python manage.py makemigrations --merge
+
+# Marquer les migrations comme appliquées sans les appliquer réellement
+# Cela permet d'éviter les conflits avec la base de données existante
+echo "Configuration des migrations Django pour correspondre à la base de données existante..."
+python manage.py migrate --fake vehicle 0004_alter_vehicle_mileage_alter_vehicle_year
+python manage.py migrate --fake vehicle 0005_auto_match_database_schema
+python manage.py migrate --fake folder 0002_file
+python manage.py migrate --fake folder 0003_auto_match_database_schema
+
+# Vérification si des migrations sont encore nécessaires
+python manage.py showmigrations
+
+# N'appliquer que les migrations réellement nécessaires et non marquées comme appliquées
+echo "Application des autres migrations si nécessaire..."
+python manage.py migrate --plan
 python manage.py migrate
 
 # Vérification du fonctionnement d'Ollama

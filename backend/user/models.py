@@ -34,6 +34,7 @@ class User(AbstractUser):
     class Meta:
         db_table = 'users'
         swappable = 'AUTH_USER_MODEL'
+        managed = False  # Django ne tentera pas de gérer cette table
 
     def __str__(self):
         return f"{self.email} - {self.role}"

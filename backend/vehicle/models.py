@@ -85,6 +85,7 @@ class Vehicle(models.Model):
     class Meta:
         db_table = 'vehicles'
         ordering = ['-date_added']
+        managed = False  # Django ne tentera pas de gérer cette table
 
     def __str__(self):
         return f"{self.brand} {self.model} ({self.type_offer})"

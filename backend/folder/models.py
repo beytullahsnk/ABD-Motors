@@ -24,6 +24,7 @@ class Folder(models.Model):
 
     class Meta:
         db_table = 'folders'
+        managed = False  # Django ne tentera pas de gérer cette table
 
     def __str__(self):
         return f"Folder {self.type_folder} - {self.client.username}"

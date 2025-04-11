@@ -1,13 +1,21 @@
 #!/bin/bash
 
 # Variables
-BACKEND_DIR="/home/ubuntu/ABDmotors/backend"
-FRONTEND_DIR="/home/ubuntu/ABDmotors/frontend"
+BACKEND_DIR="/home/ubuntu/ABD-Motors/backend"
+FRONTEND_DIR="/home/ubuntu/ABD-Motors/frontend"
 
 # Installation des dépendances système
 echo "Installation des dépendances système..."
 sudo apt-get update
-sudo apt-get install -y python3-pip python3-venv nginx postgresql-client nodejs npm
+sudo apt-get install -y python3-pip python3-venv nginx postgresql-client curl
+
+# Installation de Node.js (méthode compatible avec Ubuntu 22.04 et 24.04)
+echo "Installation de Node.js..."
+if ! command -v nodejs &> /dev/null; then
+    # Use NodeSource pour installer une version récente de Node.js
+    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+fi
 
 # Installation d'Ollama pour GenIA
 echo "Installation d'Ollama pour l'API GenIA..."
@@ -42,7 +50,7 @@ server {
 
     # Frontend
     location / {
-        root /home/ubuntu/frontend/build;
+        root /home/ubuntu/ABD-Motors/frontend/build;
         try_files $uri $uri/ /index.html;
     }
 
@@ -80,9 +88,9 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/home/ubuntu/backend
-Environment="PATH=/home/ubuntu/backend/venv/bin"
-ExecStart=/home/ubuntu/backend/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 config.wsgi:application
+WorkingDirectory=/home/ubuntu/ABD-Motors/backend
+Environment="PATH=/home/ubuntu/ABD-Motors/backend/venv/bin"
+ExecStart=/home/ubuntu/ABD-Motors/backend/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 config.wsgi:application
 
 [Install]
 WantedBy=multi-user.target

@@ -46,6 +46,13 @@ class File(models.Model):
         on_delete=models.CASCADE,
         related_name='documents'
     )
+    folder = models.ForeignKey(
+        Folder,
+        on_delete=models.CASCADE,
+        related_name='files',
+        null=True,
+        blank=True
+    )
     document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPES, default='OTHER')
     file = models.FileField(upload_to='documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)

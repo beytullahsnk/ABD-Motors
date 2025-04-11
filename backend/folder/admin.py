@@ -7,7 +7,7 @@ class FileInline(admin.TabularInline):
     extra = 1
     readonly_fields = ('uploaded_at', 'file_preview')
     fields = ('document_type', 'file', 'verification_notes', 'uploaded_at', 'file_preview')
-    fk_name = 'vehicle'  # Liaison avec le vehicle dans Folder
+    fk_name = 'folder'  # Liaison avec le folder, pas vehicle
 
     def file_preview(self, obj):
         if obj.file:

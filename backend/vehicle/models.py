@@ -2,12 +2,24 @@ from django.db import models
 from user.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 import logging
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 # Models vehicle.
 
 class Vehicle(models.Model):
+    TYPES = (
+        ('SALE', 'À vendre'),
+        ('RENTAL', 'À louer'),
+    )
+    STATES = (
+        ('AVAILABLE', 'Disponible'),
+        ('RESERVED', 'Réservé'),
+        ('SOLD', 'Vendu'),
+        ('RENTED', 'Loué'),
+    )
+    
     FUEL_TYPES = (
         ('ESSENCE', 'Essence'),
         ('DIESEL', 'Diesel'),

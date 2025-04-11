@@ -16,8 +16,8 @@ import boto3
 # Create your views here.
 
 class VehicleFilter(django_filters.FilterSet):
-    min_price = django_filters.NumberFilter(field_name='daily_rate', lookup_expr='gte')
-    max_price = django_filters.NumberFilter(field_name='daily_rate', lookup_expr='lte')
+    min_price = django_filters.NumberFilter(field_name='rental_price', lookup_expr='gte')
+    max_price = django_filters.NumberFilter(field_name='rental_price', lookup_expr='lte')
     min_year = django_filters.NumberFilter(field_name='year', lookup_expr='gte')
     max_year = django_filters.NumberFilter(field_name='year', lookup_expr='lte')
     min_mileage = django_filters.NumberFilter(field_name='mileage', lookup_expr='gte')
@@ -28,8 +28,8 @@ class VehicleFilter(django_filters.FilterSet):
         fields = {
             'brand': ['exact', 'icontains'],
             'model': ['exact', 'icontains'],
-            'fuel_type': ['exact'],
-            'transmission': ['exact'],
+            'type_offer': ['exact'],
+            'state': ['exact'],
             'is_available': ['exact'],
             'year': ['exact'],
             'mileage': ['exact'],
@@ -115,27 +115,39 @@ class VehicleViewSet(viewsets.ModelViewSet):
             })
 
         # Vérifier si l'image existe dans S3
-        if settings.USE_S3:
-            s3 = boto3.client('s3',
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                region_name=settings.AWS_S3_REGION_NAME
-            )
+        if hasattr(settings, 'USE_S3') and settings.USE_S3:
             try:
+                s3 = boto3.client('s3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME
+                )
+                
                 # Construire le chemin S3
                 s3_path = f"media/vehicles/{vehicle.image.name.split('/')[-1]}"
-                s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_path)
-                exists_in_s3 = True
-            except:
-                exists_in_s3 = False
+                
+                try:
+                    s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_path)
+                    exists_in_s3 = True
+                except Exception as e:
+                    exists_in_s3 = False
+                    print(f"Erreur de vérification S3: {str(e)}")
 
-            return Response({
-                'status': 'success',
-                'image_name': vehicle.image.name,
-                'image_url': vehicle.image.url,
-                'exists_in_s3': exists_in_s3,
-                's3_path': s3_path if exists_in_s3 else None
-            })
+                return Response({
+                    'status': 'success',
+                    'image_name': vehicle.image.name,
+                    'image_url': vehicle.image.url,
+                    'exists_in_s3': exists_in_s3,
+                    's3_path': s3_path if exists_in_s3 else None
+                })
+            except Exception as e:
+                print(f"Erreur S3: {str(e)}")
+                return Response({
+                    'status': 'warning',
+                    'message': f"Erreur lors de la vérification S3: {str(e)}",
+                    'image_name': vehicle.image.name,
+                    'image_url': vehicle.image.url
+                })
         
         return Response({
             'status': 'success',

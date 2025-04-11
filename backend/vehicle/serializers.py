@@ -28,4 +28,15 @@ class VehicleSerializer(serializers.ModelSerializer):
             print(f"S3 URL: {s3_url}")
             
             return s3_url
-        return None 
+        return None
+
+class VehicleDetailSerializer(VehicleSerializer):
+    """Serializer pour les détails d'un véhicule."""
+    
+    class Meta(VehicleSerializer.Meta):
+        fields = VehicleSerializer.Meta.fields + [
+            'owner', 'renter', 'rental_start_date', 'rental_end_date',
+            'is_available', 'has_technical_control', 'has_assistance',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ('owner', 'renter') 

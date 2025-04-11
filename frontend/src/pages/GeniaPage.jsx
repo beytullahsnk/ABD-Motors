@@ -3,12 +3,11 @@ import { Container, Grid, Typography, Paper, TextField, Button,
          CircularProgress, Box, Divider } from '@mui/material';
 import { Upload, Send, InsertDriveFile, Chat, CloudDownload } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import api from '../services/api'; // Importation de l'instance API configurée
 
 const GeniaPage = () => {
   const { user } = useAuth();
-  // Obtenir le token directement depuis localStorage
-  const token = user?.access || JSON.parse(localStorage.getItem('user'))?.access;
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
   
   const [documents, setDocuments] = useState([]);
   const [query, setQuery] = useState('');
@@ -21,37 +20,27 @@ const GeniaPage = () => {
   const [s3Loading, setS3Loading] = useState(false);
   const [showS3Modal, setShowS3Modal] = useState(false);
 
-  // Configuration Axios
-  const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000/api',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    }
-  });
-
-  // Vérifier la présence du token
+  // Vérifier la présence du user
   useEffect(() => {
-    if (!token) {
-      console.error("Aucun token d'authentification trouvé");
+    if (!user) {
+      console.error("Aucun utilisateur authentifié trouvé");
       alert("Erreur d'authentification. Veuillez vous reconnecter.");
     } else {
-      console.log("Token disponible:", token.substring(0, 15) + "...");
+      console.log("Utilisateur authentifié:", user.username);
     }
-  }, [token]);
+  }, [user]);
 
   // Pour les requêtes d'upload
   const uploadFile = async (formData) => {
     try {
-      console.log("Token utilisé:", token);
       console.log("Fichier à uploader:", formData.get('file')?.name);
       
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:8000/api'}/genia/documents/`, 
+      const response = await api.post(
+        `/genia/documents/`, 
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${token}`
+            'Content-Type': 'multipart/form-data'
           }
         }
       );
@@ -82,10 +71,10 @@ const GeniaPage = () => {
       }
     };
 
-    if (token) {
+    if (user) {
       fetchDocuments();
     }
-  }, [token]);
+  }, [user]);
 
   // Gérer l'upload
   const handleFileChange = (e) => {

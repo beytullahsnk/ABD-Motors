@@ -4,7 +4,7 @@ from django.conf import settings
 
 class VehicleSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
-    is_available = serializers.BooleanField(read_only=True)
+    is_available = serializers.SerializerMethodField()
 
     class Meta:
         model = Vehicle
@@ -12,7 +12,7 @@ class VehicleSerializer(serializers.ModelSerializer):
                  'rental_price', 'type_offer', 'state', 'description', 'image', 
                  'image_url', 'has_insurance', 'has_maintenance', 'date_added',
                  'is_available']
-        read_only_fields = ('owner', 'renter', 'is_available')
+        read_only_fields = ('owner', 'renter')
 
     def get_image_url(self, obj):
         if obj.image:
@@ -31,11 +31,14 @@ class VehicleSerializer(serializers.ModelSerializer):
             
             return s3_url
         return None
+        
+    def get_is_available(self, obj):
+        return obj.state == 'AVAILABLE'
 
 class VehicleDetailSerializer(VehicleSerializer):
     """Serializer pour les détails d'un véhicule."""
-    created_at = serializers.DateTimeField(read_only=True)
-    updated_at = serializers.DateTimeField(read_only=True)
+    created_at = serializers.DateTimeField(source='date_added', read_only=True)
+    updated_at = serializers.DateTimeField(source='date_added', read_only=True)
     
     class Meta(VehicleSerializer.Meta):
         fields = VehicleSerializer.Meta.fields + [

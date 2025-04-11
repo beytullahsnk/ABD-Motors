@@ -7,7 +7,8 @@ from vehicle.models import Vehicle
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = '__all__'
+        fields = ['id', 'vehicle', 'folder', 'document_type', 'file', 
+                 'uploaded_at', 'is_verified', 'verification_date', 'verification_notes']
         read_only_fields = ('folder',)
 
 class FolderSerializer(serializers.ModelSerializer):

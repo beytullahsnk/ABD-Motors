@@ -36,11 +36,12 @@ class File(models.Model):
         ('OTHER', 'Autre')
     )
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='documents'
-    )
+    # Commenté pour résoudre l'erreur "column files.user_id does not exist"
+    # user = models.ForeignKey(
+    #     settings.AUTH_USER_MODEL,
+    #     on_delete=models.CASCADE,
+    #     related_name='documents'
+    # )
     vehicle = models.ForeignKey(
         Vehicle,
         on_delete=models.CASCADE,
@@ -62,7 +63,9 @@ class File(models.Model):
 
     class Meta:
         db_table = 'files'
+        managed = False  # Django ne tentera pas de gérer cette table
         ordering = ['-uploaded_at']
 
     def __str__(self):
-        return f"{self.get_document_type_display()} - {self.user.email}"
+        # Modifié pour ne pas utiliser user qui est maintenant commenté
+        return f"{self.get_document_type_display()} - {self.id}"

@@ -12,8 +12,8 @@ class User(AbstractUser):
     phone = models.CharField(max_length=15, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
 
     # Ajout des related_name pour résoudre les conflits
     groups = models.ManyToManyField(

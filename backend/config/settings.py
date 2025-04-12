@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-default-dev-key-123')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # AWS Configuration
 USE_S3 = os.getenv('USE_S3', 'True') == 'True'
@@ -58,8 +58,20 @@ DATABASES = {
 }
 
 # Lightsail Configuration
-ALLOWED_HOSTS = ['*']  # Accepte toutes les connexions entrantes
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Configurations supplémentaires de sécurité
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 an
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
 
 # Application definition
 
@@ -112,12 +124,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://13.36.169.214",
     "https://abdmotors-groupe9.com",
+    "http://abdmotors-groupe9.com",
     "https://*.amazonaws.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 # Configuration Sécurité
-SECURE_SSL_REDIRECT = not DEBUG
+SECURE_SSL_REDIRECT = not DEBUG and os.getenv('ENFORCE_HTTPS', 'True') == 'True'
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 

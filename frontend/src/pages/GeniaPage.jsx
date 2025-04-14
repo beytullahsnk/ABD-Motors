@@ -23,7 +23,7 @@ const GeniaPage = () => {
 
   // Configuration Axios
   const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000/api',
+    baseURL: 'http://localhost:8000/api', // Forcer l'utilisation de l'URL locale
     headers: {
       'Authorization': `Bearer ${token}`,
     }
@@ -46,7 +46,7 @@ const GeniaPage = () => {
       console.log("Fichier à uploader:", formData.get('file')?.name);
       
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:8000/api'}/genia/documents/`, 
+        'http://localhost:8000/api/genia/documents/', // Forcer l'URL locale
         formData,
         {
           headers: {

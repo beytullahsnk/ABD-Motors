@@ -478,54 +478,65 @@ const Profile = () => {
                         ))}
                     </Tabs>
 
-                    <TabPanel value={tabValue} index={0}>
-                        <TableContainer>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Véhicule</TableCell>
-                                        <TableCell>Type</TableCell>
-                                        <TableCell>Date de création</TableCell>
-                                        <TableCell align="right">Actions</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {getFoldersByStatus(FOLDER_TABS[tabValue].value).map((folder) => (
-                                        <TableRow key={folder.id}>
-                                            <TableCell>
-                                                <Typography variant="subtitle2">
-                                                    {folder.vehicle.brand} {folder.vehicle.model}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    {folder.vehicle.year}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    label={folder.type_folder === 'RENTAL' ? 'Location' : 'Achat'}
-                                                    color={folder.type_folder === 'RENTAL' ? 'primary' : 'secondary'}
-                                                    size="small"
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                {format(new Date(folder.creation_date), 'dd/MM/yyyy HH:mm', { locale: fr })}
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Button
-                                                    size="small"
-                                                    variant="outlined"
-                                                    onClick={() => navigate(`/vehicles/${folder.vehicle.id}`)}
-                                                    startIcon={<DirectionsCarIcon />}
-                                                >
-                                                    Voir le véhicule
-                                                </Button>
-                                            </TableCell>
+                    {FOLDER_TABS.map((tab, index) => (
+                        <TabPanel key={tab.value} value={tabValue} index={index}>
+                            <TableContainer>
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Véhicule</TableCell>
+                                            <TableCell>Type</TableCell>
+                                            <TableCell>Date de création</TableCell>
+                                            <TableCell align="right">Actions</TableCell>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </TabPanel>
+                                    </TableHead>
+                                    <TableBody>
+                                        {getFoldersByStatus(tab.value).map((folder) => (
+                                            <TableRow key={folder.id}>
+                                                <TableCell>
+                                                    <Typography variant="subtitle2">
+                                                        {folder.vehicle.brand} {folder.vehicle.model}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {folder.vehicle.year}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Chip
+                                                        label={folder.type_folder === 'RENTAL' ? 'Location' : 'Achat'}
+                                                        color={folder.type_folder === 'RENTAL' ? 'primary' : 'secondary'}
+                                                        size="small"
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    {format(new Date(folder.creation_date), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        onClick={() => navigate(`/vehicles/${folder.vehicle.id}`)}
+                                                        startIcon={<DirectionsCarIcon />}
+                                                    >
+                                                        Voir le véhicule
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                        {getFoldersByStatus(tab.value).length === 0 && (
+                                            <TableRow>
+                                                <TableCell colSpan={4} align="center">
+                                                    <Typography variant="body1" sx={{ py: 2 }}>
+                                                        Aucun dossier {tab.label.toLowerCase()}
+                                                    </Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </TabPanel>
+                    ))}
                 </Card>
             </Container>
         );

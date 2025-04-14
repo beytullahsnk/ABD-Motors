@@ -186,6 +186,9 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 if hasattr(settings, 'AWS_STORAGE_BUCKET_NAME') and settings.AWS_STORAGE_BUCKET_NAME:
                     try:
                         print(f"Tentative de téléchargement depuis S3: bucket={settings.AWS_STORAGE_BUCKET_NAME}, fichier={file_key}")
+                        print(f"AWS Settings: Region={settings.AWS_S3_REGION_NAME}, Custom Domain={settings.AWS_S3_CUSTOM_DOMAIN}")
+                        print(f"AWS Credentials: Access Key ID={settings.AWS_ACCESS_KEY_ID[:5]}..., Secret Access Key={settings.AWS_SECRET_ACCESS_KEY[:5]}...")
+                        
                         # Configuration du client S3
                         s3 = boto3.client(
                             's3',
@@ -194,22 +197,44 @@ class DocumentViewSet(viewsets.ModelViewSet):
                             region_name=settings.AWS_S3_REGION_NAME
                         )
                         
+                        # Test de connexion à S3
+                        try:
+                            print("Test de connexion à S3...")
+                            response = s3.list_buckets()
+                            print(f"Buckets disponibles: {[bucket['Name'] for bucket in response['Buckets']]}")
+                            if settings.AWS_STORAGE_BUCKET_NAME not in [bucket['Name'] for bucket in response['Buckets']]:
+                                print(f"ATTENTION: Bucket {settings.AWS_STORAGE_BUCKET_NAME} non trouvé dans la liste des buckets accessibles!")
+                        except Exception as e:
+                            print(f"Erreur lors du test de connexion à S3: {str(e)}")
+                        
                         # Créer un fichier temporaire pour stocker le contenu du fichier S3
                         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
                             temp_path = temp_file.name
                             # Utiliser la clé telle quelle, car elle doit déjà contenir le préfixe complet
                             s3_key = file_key
                             print(f"Téléchargement depuis S3: {s3_key} -> {temp_path}")
-                            
+
                             # Télécharger le fichier
-                            s3.download_file(
-                                settings.AWS_STORAGE_BUCKET_NAME,
-                                s3_key,
-                                temp_path
-                            )
-                            print(f"Fichier téléchargé avec succès: {temp_path}")
+                            try:
+                                s3.download_file(
+                                    settings.AWS_STORAGE_BUCKET_NAME,
+                                    s3_key,
+                                    temp_path
+                                )
+                                print(f"Fichier téléchargé avec succès: {temp_path}")
+                            except Exception as e:
+                                print(f"Erreur spécifique lors du téléchargement du fichier: {str(e)}")
+                                print(f"Vérification si le fichier existe dans S3...")
+                                try:
+                                    s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_key)
+                                    print(f"Le fichier existe dans S3, mais le téléchargement a échoué")
+                                except Exception as e2:
+                                    print(f"Le fichier n'existe pas dans S3: {str(e2)}")
+                                    
+                                # Lever l'exception pour le traitement en amont
+                                raise
                     except Exception as e:
-                        print(f"Erreur lors du téléchargement depuis S3: {str(e)}")
+                        print(f"Erreur détaillée lors du téléchargement depuis S3: {str(e)}")
                         # Fallback: Essayez d'utiliser le chemin local du fichier
                         if hasattr(document.file, 'path'):
                             temp_path = document.file.path
@@ -261,11 +286,14 @@ class DocumentViewSet(viewsets.ModelViewSet):
         """Liste les documents disponibles dans le bucket S3."""
         try:
             if not hasattr(settings, 'AWS_STORAGE_BUCKET_NAME') or not settings.AWS_STORAGE_BUCKET_NAME:
+                print("AWS S3 n'est pas configuré correctement: AWS_STORAGE_BUCKET_NAME manquant ou vide")
                 return Response(
                     {'error': 'AWS S3 n\'est pas configuré correctement'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
-                
+            
+            print(f"AWS Configuration: AWS_STORAGE_BUCKET_NAME={settings.AWS_STORAGE_BUCKET_NAME}, AWS_S3_REGION_NAME={settings.AWS_S3_REGION_NAME}")
+            
             # Configuration du client S3
             s3 = boto3.client(
                 's3',
@@ -274,15 +302,41 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 region_name=settings.AWS_S3_REGION_NAME
             )
             
+            # Test de connexion à S3
+            try:
+                print("Test de connexion à S3 depuis list_s3_documents...")
+                response = s3.list_buckets()
+                print(f"Buckets disponibles: {[bucket['Name'] for bucket in response['Buckets']]}")
+                if settings.AWS_STORAGE_BUCKET_NAME not in [bucket['Name'] for bucket in response['Buckets']]:
+                    print(f"ATTENTION: Bucket {settings.AWS_STORAGE_BUCKET_NAME} non trouvé dans la liste des buckets accessibles!")
+                    return Response(
+                        {'error': f'Le bucket S3 {settings.AWS_STORAGE_BUCKET_NAME} n\'est pas accessible avec les identifiants fournis'},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            except Exception as e:
+                print(f"Erreur lors du test de connexion à S3: {str(e)}")
+                return Response(
+                    {'error': f'Erreur de connexion à AWS S3: {str(e)}'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
             # Préfixe pour la recherche dans S3
             prefix = 'media/documents/'
             print(f"Recherche des documents dans S3 avec préfixe: {prefix}")
             
             # Lister les objets dans le dossier media/documents/
-            response = s3.list_objects_v2(
-                Bucket=settings.AWS_STORAGE_BUCKET_NAME,
-                Prefix=prefix
-            )
+            try:
+                response = s3.list_objects_v2(
+                    Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                    Prefix=prefix
+                )
+                print(f"Réponse de list_objects_v2: {response}")
+            except Exception as e:
+                print(f"Erreur lors de la liste des objets S3: {str(e)}")
+                return Response(
+                    {'error': f'Erreur lors de la liste des objets S3: {str(e)}'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
             
             # Formater la réponse
             documents = []
@@ -301,12 +355,13 @@ class DocumentViewSet(viewsets.ModelViewSet):
                     })
                 
                 print(f"Nombre de documents trouvés: {len(documents)}")
+                print(f"Documents: {documents}")
             else:
                 print("Aucun document trouvé dans le bucket S3")
             
             return Response(documents)
         except Exception as e:
-            print(f"Erreur lors de la liste des documents S3: {str(e)}")
+            print(f"Erreur générale lors de la liste des documents S3: {str(e)}")
             return Response(
                 {'error': f'Erreur lors de la liste des documents S3: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
